@@ -1,0 +1,621 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Café Alquimia · 18 de Julho</title>
+<meta property="og:title" content="Café Alquimia · Uma Alquimia de Encontros">
+<meta property="og:description" content="18 de julho, das 15h às 21h. Pousada Terapêutica Mangará, Camaçari - BA.">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400;1,500&family=EB+Garamond:ital,wght@0,400;1,400&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --perg:    #E8DFC8;
+    --perg-lt: #F2EAD8;
+    --perg-dk: #D6C9AD;
+    --gold:    #9A7A2E;
+    --gold-lt: #C49A3C;
+    --espresso:#2A1A08;
+    --mocha:   #5A3A18;
+    --olive:   #4A5230;
+    --border:  #C8B88A;
+  }
+
+  body {
+    background: var(--perg-lt);
+    font-family: 'EB Garamond', 'Cormorant Garamond', serif;
+    color: var(--espresso);
+    min-height: 100vh;
+  }
+
+  /* ── FAIXA TOPO ── */
+  .faixa-topo {
+    background: var(--espresso);
+    text-align: center;
+    padding: 10px;
+    font-family: 'Cormorant Garamond', serif;
+    font-style: italic;
+    font-size: 13px;
+    color: var(--gold-lt);
+    letter-spacing: .12em;
+  }
+
+  /* ── HERO ── */
+  .hero {
+    background: var(--perg);
+    text-align: center;
+    padding: 3rem 2rem 2.5rem;
+    border-bottom: 1px solid var(--border);
+    position: relative;
+  }
+
+  /* gato ornamental SVG */
+  .gato-wrap {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 1.5rem;
+  }
+  .gato-frame {
+    width: 120px;
+    height: 120px;
+    border: .5px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--perg-lt);
+    position: relative;
+  }
+  .gato-frame::before, .gato-frame::after {
+    content: '';
+    position: absolute;
+    width: 10px; height: 10px;
+    border: .5px solid var(--gold);
+  }
+  .gato-frame::before { top: -5px; left: -5px; border-right: none; border-bottom: none; }
+  .gato-frame::after  { bottom: -5px; right: -5px; border-left: none; border-top: none; }
+  .gato-svg { width: 90px; height: 90px; opacity: .75; }
+
+  .hero-eyebrow {
+    font-style: italic;
+    font-size: 14px;
+    color: var(--gold);
+    letter-spacing: .08em;
+    margin-bottom: 1.25rem;
+  }
+
+  .ornament {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    margin-bottom: 1.25rem;
+  }
+  .orn-line { width: 50px; height: .5px; background: var(--border); }
+  .orn-diamond { width: 5px; height: 5px; border: .5px solid var(--gold); transform: rotate(45deg); }
+
+  .hero-brand-pre {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 18px;
+    font-weight: 300;
+    color: var(--mocha);
+    letter-spacing: .25em;
+    text-transform: uppercase;
+    margin-bottom: .2rem;
+  }
+  .hero-brand {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 62px;
+    font-weight: 300;
+    font-style: italic;
+    color: var(--espresso);
+    line-height: 1;
+    margin-bottom: 2rem;
+  }
+
+  .hero-texto {
+    max-width: 420px;
+    margin: 0 auto 2rem;
+    font-style: italic;
+    font-size: 16px;
+    line-height: 1.9;
+    color: var(--mocha);
+  }
+
+  .hero-data-bloco {
+    display: inline-block;
+    border-top: .5px solid var(--border);
+    border-bottom: .5px solid var(--border);
+    padding: 1rem 2.5rem;
+    margin-bottom: 0;
+  }
+  .hero-data {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 28px;
+    font-weight: 400;
+    color: var(--gold);
+    letter-spacing: .04em;
+    margin-bottom: .2rem;
+  }
+  .hero-hora {
+    font-style: italic;
+    font-size: 14px;
+    color: var(--mocha);
+    letter-spacing: .08em;
+  }
+
+  /* ── CARTA ── */
+  .carta-wrap {
+    background: var(--perg-lt);
+    border-top: .5px solid var(--border);
+    border-bottom: .5px solid var(--border);
+    padding: 2.5rem 2rem;
+  }
+  .carta {
+    max-width: 480px;
+    margin: 0 auto;
+    text-align: center;
+  }
+  .carta-p {
+    font-style: italic;
+    font-size: 15.5px;
+    line-height: 2;
+    color: var(--mocha);
+    margin-bottom: 1.5rem;
+  }
+  .carta-destaque {
+    font-size: 18px;
+    font-weight: 400;
+    color: var(--espresso);
+    margin-bottom: .4rem;
+  }
+  .carta-destaque em {
+    font-style: italic;
+    color: var(--gold);
+    font-size: 22px;
+  }
+  .carta-assinatura {
+    margin-top: 2rem;
+    font-size: 13px;
+    color: var(--mocha);
+    font-style: italic;
+    letter-spacing: .06em;
+  }
+  .carta-assinatura strong {
+    display: block;
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 17px;
+    font-weight: 400;
+    font-style: normal;
+    color: var(--espresso);
+    margin-top: 4px;
+    letter-spacing: .04em;
+  }
+
+  /* ── FORMULÁRIO ── */
+  .form-wrap {
+    background: var(--perg);
+    padding: 2.5rem 2rem 3rem;
+  }
+  .form-inner { max-width: 480px; margin: 0 auto; }
+
+  .section-lbl {
+    text-align: center;
+    font-style: italic;
+    font-size: 14px;
+    color: var(--gold);
+    letter-spacing: .08em;
+    margin-bottom: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .section-lbl::before, .section-lbl::after {
+    content: '';
+    flex: 1;
+    height: .5px;
+    background: var(--border);
+  }
+
+  /* barra de vagas */
+  .vagas-bar { margin-bottom: 1.75rem; }
+  .vagas-label {
+    display: flex;
+    justify-content: space-between;
+    font-size: 11px;
+    font-style: italic;
+    color: var(--mocha);
+    margin-bottom: 7px;
+  }
+  .vagas-label span { color: var(--gold); font-style: normal; }
+  .prog-track { height: 1.5px; background: var(--perg-dk); }
+  .prog-fill { height: 1.5px; background: var(--gold); transition: width .7s ease; width: 0%; }
+
+  .form { display: flex; flex-direction: column; gap: 14px; }
+  .field { display: flex; flex-direction: column; gap: 6px; }
+  .field label {
+    font-size: 10px;
+    letter-spacing: .25em;
+    text-transform: uppercase;
+    color: var(--mocha);
+    font-family: 'Cormorant Garamond', serif;
+  }
+  .field input, .field select {
+    width: 100%;
+    height: 42px;
+    padding: 0 14px;
+    background: var(--perg-lt);
+    border: .5px solid var(--border);
+    border-radius: 0;
+    font-family: 'EB Garamond', serif;
+    font-size: 15px;
+    color: var(--espresso);
+    outline: none;
+    appearance: none;
+    -webkit-appearance: none;
+    transition: border-color .2s;
+  }
+  .field input::placeholder { color: #B8A87A; font-style: italic; }
+  .field input:focus, .field select:focus { border-color: var(--gold); }
+  .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .sel-wrap { position: relative; }
+  .sel-wrap::after {
+    content: '';
+    position: absolute;
+    right: 14px; top: 50%;
+    transform: translateY(-50%) rotate(45deg);
+    width: 5px; height: 5px;
+    border-right: .5px solid var(--gold);
+    border-bottom: .5px solid var(--gold);
+    pointer-events: none;
+  }
+
+  .btn-main {
+    width: 100%;
+    padding: 14px;
+    background: var(--espresso);
+    color: var(--perg-lt);
+    border: none;
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 14px;
+    font-style: italic;
+    letter-spacing: .15em;
+    cursor: pointer;
+    transition: background .2s;
+    margin-top: 4px;
+  }
+  .btn-main:hover { background: var(--mocha); }
+  .btn-main:disabled { background: #B8A87A; cursor: not-allowed; }
+
+  .erro-msg {
+    display: none;
+    font-size: 12px;
+    font-style: italic;
+    color: #7A2020;
+    text-align: center;
+    padding: 8px;
+    background: #F8EDED;
+    border: .5px solid #D8AAAA;
+  }
+
+  /* ── ESGOTADO ── */
+  .esgotado {
+    display: none;
+    text-align: center;
+    padding: 3rem 2rem;
+    background: var(--perg);
+    border: .5px solid var(--border);
+    max-width: 480px;
+    margin: 0 auto;
+  }
+  .esgotado-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 26px;
+    font-style: italic;
+    color: var(--espresso);
+    margin-bottom: .75rem;
+  }
+  .esgotado-msg { font-size: 14px; font-style: italic; color: var(--mocha); line-height: 1.9; margin-bottom: 1.5rem; }
+
+  /* ── SUCESSO ── */
+  .sucesso {
+    display: none;
+    text-align: center;
+    padding: 3rem 2rem;
+    max-width: 480px;
+    margin: 0 auto;
+  }
+  .sucesso-ornamento { font-size: 22px; color: var(--gold); margin-bottom: 1.25rem; letter-spacing: .3em; }
+  .sucesso-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 30px;
+    font-style: italic;
+    color: var(--espresso);
+    margin-bottom: .75rem;
+  }
+  .sucesso-msg { font-size: 14px; font-style: italic; color: var(--mocha); line-height: 1.9; margin-bottom: 1.75rem; }
+  .btn-wpp {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 11px 28px;
+    border: .5px solid var(--gold);
+    background: transparent;
+    color: var(--gold);
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 13px;
+    font-style: italic;
+    letter-spacing: .1em;
+    cursor: pointer;
+    text-decoration: none;
+    transition: background .2s, color .2s;
+  }
+  .btn-wpp:hover { background: var(--gold); color: var(--perg-lt); }
+
+  /* ── RODAPÉ ── */
+  .ftr {
+    background: var(--olive);
+    padding: 1.25rem;
+    text-align: center;
+    border-top: 1px solid #3A4228;
+  }
+  .ftr-txt {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 13px;
+    font-style: italic;
+    color: #C8D0A0;
+    letter-spacing: .08em;
+  }
+
+  @media (max-width: 480px) {
+    .hero-brand { font-size: 44px; }
+    .field-row { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<div class="faixa-topo">~ Uma Alquimia de Encontros ~</div>
+
+<header class="hero">
+
+  <!-- Gato alquímico SVG ornamental -->
+  <div class="gato-wrap">
+    <div class="gato-frame">
+      <svg class="gato-svg" viewBox="0 0 90 90" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <!-- corpo do gato estilizado -->
+        <ellipse cx="45" cy="58" rx="22" ry="18" fill="none" stroke="#9A7A2E" stroke-width=".8"/>
+        <!-- cabeça -->
+        <circle cx="45" cy="34" r="14" fill="none" stroke="#9A7A2E" stroke-width=".8"/>
+        <!-- orelhas -->
+        <polyline points="34,23 30,14 38,22" fill="none" stroke="#9A7A2E" stroke-width=".8"/>
+        <polyline points="56,23 60,14 52,22" fill="none" stroke="#9A7A2E" stroke-width=".8"/>
+        <!-- olhos -->
+        <ellipse cx="39" cy="33" rx="3" ry="3.5" fill="none" stroke="#9A7A2E" stroke-width=".7"/>
+        <ellipse cx="51" cy="33" rx="3" ry="3.5" fill="none" stroke="#9A7A2E" stroke-width=".7"/>
+        <circle cx="39" cy="33" r="1.2" fill="#9A7A2E"/>
+        <circle cx="51" cy="33" r="1.2" fill="#9A7A2E"/>
+        <!-- nariz e bigodes -->
+        <path d="M45 38 L43 40 L47 40 Z" fill="#9A7A2E"/>
+        <line x1="30" y1="38" x2="41" y2="39" stroke="#9A7A2E" stroke-width=".6"/>
+        <line x1="30" y1="41" x2="41" y2="40" stroke="#9A7A2E" stroke-width=".6"/>
+        <line x1="60" y1="38" x2="49" y2="39" stroke="#9A7A2E" stroke-width=".6"/>
+        <line x1="60" y1="41" x2="49" y2="40" stroke="#9A7A2E" stroke-width=".6"/>
+        <!-- bule pequeno embaixo -->
+        <ellipse cx="45" cy="70" rx="8" ry="4" fill="none" stroke="#9A7A2E" stroke-width=".7"/>
+        <path d="M37 68 Q33 70 37 72" fill="none" stroke="#9A7A2E" stroke-width=".7"/>
+        <path d="M53 69 L57 67" fill="none" stroke="#9A7A2E" stroke-width=".7"/>
+        <ellipse cx="45" cy="66" rx="5" ry="2" fill="none" stroke="#9A7A2E" stroke-width=".6"/>
+        <!-- vapor -->
+        <path d="M42 62 Q43 59 42 57" fill="none" stroke="#9A7A2E" stroke-width=".5" stroke-dasharray="1,1.5"/>
+        <path d="M45 62 Q46 58 45 56" fill="none" stroke="#9A7A2E" stroke-width=".5" stroke-dasharray="1,1.5"/>
+        <path d="M48 62 Q49 59 48 57" fill="none" stroke="#9A7A2E" stroke-width=".5" stroke-dasharray="1,1.5"/>
+      </svg>
+    </div>
+  </div>
+
+  <p class="hero-eyebrow">Você está convidado</p>
+
+  <div class="ornament">
+    <div class="orn-line"></div>
+    <div class="orn-diamond"></div>
+    <div class="orn-line"></div>
+  </div>
+
+  <p class="hero-brand-pre">Café</p>
+  <h1 class="hero-brand">Alquimia</h1>
+
+  <p class="hero-texto">
+    Há momentos que não pedem grandes anúncios.<br>
+    Pedem apenas a presença de pessoas queridas<br>
+    para compartilhar o nascimento de algo<br>
+    construído com amor e intenção.
+  </p>
+
+  <div class="hero-data-bloco">
+    <div class="hero-data">18 de Julho</div>
+    <div class="hero-hora">das 15h às 21h</div>
+  </div>
+
+</header>
+
+<!-- Carta -->
+<div class="carta-wrap">
+  <div class="carta">
+    <p class="carta-p">
+      Um cantinho criado para encontros sem pressa,<br>
+      conversas verdadeiras e conexões que ficam.<br><br>
+      Um espaço onde a arte e a poesia também têm lugar —<br>
+      para trocas que alimentam a alma tanto quanto o café.
+    </p>
+
+    <div class="ornament" style="margin-bottom:1.5rem">
+      <div class="orn-line"></div>
+      <div class="orn-diamond"></div>
+      <div class="orn-line"></div>
+    </div>
+
+    <p class="carta-destaque">Não estamos inaugurando um negócio.</p>
+    <p class="carta-destaque"><em>Estamos abrindo nossa casa.</em></p>
+
+    <p class="carta-p" style="margin-top:1.5rem">
+      Nada de cerimônias formais.<br>
+      Apenas o desejo genuíno de estarmos juntos,<br>
+      brindando mais um florescer deste espaço<br>
+      que tanto amamos — com arte, afeto e presença.
+    </p>
+
+    <p class="carta-p" style="margin-bottom:0">
+      Se sentir o chamado,<br>
+      será uma alegria ter você conosco neste dia.
+    </p>
+
+    <div class="carta-assinatura">
+      Com carinho,
+      <strong>Márcia Sarvájina &amp; Júlio Jayanta</strong>
+    </div>
+  </div>
+</div>
+
+<!-- Formulário -->
+<div class="form-wrap">
+  <div class="form-inner">
+
+    <div class="vagas-bar">
+      <div class="vagas-label">
+        <span>Vagas disponíveis</span>
+        <span id="vagas-txt">carregando…</span>
+      </div>
+      <div class="prog-track">
+        <div class="prog-fill" id="prog-fill"></div>
+      </div>
+    </div>
+
+    <div id="section-form">
+      <div class="section-lbl">confirme sua presença</div>
+      <form class="form" onsubmit="confirmar(event)">
+        <div class="field">
+          <label>Nome completo</label>
+          <input type="text" id="nome" placeholder="Seu nome" required>
+        </div>
+        <div class="field-row">
+          <div class="field">
+            <label>WhatsApp</label>
+            <input type="tel" id="wpp" placeholder="(71) 9 0000-0000" required>
+          </div>
+          <div class="field">
+            <label>Acompanhantes</label>
+            <div class="sel-wrap">
+              <select id="qtd">
+                <option value="1">Somente eu</option>
+                <option value="2">+ 1 pessoa</option>
+                <option value="3">+ 2 pessoas</option>
+                <option value="4">+ 3 pessoas</option>
+              </select>
+            </div>
+          </div>
+        </div>
+        <div class="field">
+          <label>Como ficou sabendo?</label>
+          <div class="sel-wrap">
+            <select id="origem">
+              <option>Instagram</option>
+              <option>Indicação pessoal</option>
+              <option>Evento anterior no Espaço</option>
+              <option>WhatsApp</option>
+              <option>Outro</option>
+            </select>
+          </div>
+        </div>
+        <div class="erro-msg" id="erro"></div>
+        <button type="submit" class="btn-main" id="btn-submit">Confirmar minha presença</button>
+      </form>
+    </div>
+
+    <div class="esgotado" id="section-esgotado">
+      <div style="font-size:20px;color:var(--gold);margin-bottom:1rem;letter-spacing:.3em">· · ·</div>
+      <div class="esgotado-title">Vagas encerradas.</div>
+      <p class="esgotado-msg">Todas as vagas foram preenchidas.<br>Para entrar na lista de espera, fale conosco.</p>
+      <a class="btn-wpp" href="https://wa.me/5571983578578?text=Gostaria%20de%20entrar%20na%20lista%20de%20espera%20do%20Café%20Alquimia">Lista de espera</a>
+    </div>
+
+    <div class="sucesso" id="section-sucesso">
+      <div class="sucesso-ornamento">· ✦ ·</div>
+      <div class="sucesso-title">Até breve, então.</div>
+      <p class="sucesso-msg">
+        Presença confirmada com carinho.<br>
+        Guarde esta data — será um dia especial.
+      </p>
+      <a class="btn-wpp" href="https://wa.me/5571983578578?text=Confirmei%20minha%20presença%20no%20Café%20Alquimia%20%F0%9F%8C%BF" target="_blank">Salvar no WhatsApp</a>
+    </div>
+
+  </div>
+</div>
+
+<footer class="ftr">
+  <div class="ftr-txt">Pousada Terapêutica Mangará · Camaçari – BA</div>
+</footer>
+
+<script type="module">
+  import { initializeApp }    from "https://www.gstatic.com/firebasejs/11.0.0/firebase-app.js";
+  import { getFirestore, collection, addDoc, onSnapshot }
+    from "https://www.gstatic.com/firebasejs/11.0.0/firebase-firestore.js";
+
+  const firebaseConfig = {
+    apiKey:            "AIzaSyBe76lIVYlw2FrFytDA74HacROTGhyQs6k",
+    authDomain:        "alquimia-7dfd3.firebaseapp.com",
+    projectId:         "alquimia-7dfd3",
+    storageBucket:     "alquimia-7dfd3.firebasestorage.app",
+    messagingSenderId: "638103115384",
+    appId:             "1:638103115384:web:083c881afc8df705ba3f8d"
+  };
+
+  const LIMITE = 30;
+  const app    = initializeApp(firebaseConfig);
+  const db     = getFirestore(app);
+  const col    = collection(db, "confirmacoes");
+  let totalOcupado = 0;
+
+  onSnapshot(col, (snap) => {
+    totalOcupado = 0;
+    snap.forEach(d => { totalOcupado += (d.data().qtd || 1); });
+    const livre = LIMITE - totalOcupado;
+    const pct   = Math.min(Math.round((totalOcupado / LIMITE) * 100), 100);
+    document.getElementById("vagas-txt").textContent = livre > 0 ? `${livre} de ${LIMITE}` : "Esgotado";
+    document.getElementById("prog-fill").style.width = pct + "%";
+    if (livre <= 0) {
+      document.getElementById("section-form").style.display     = "none";
+      document.getElementById("section-esgotado").style.display = "block";
+    }
+  });
+
+  window.confirmar = async function(e) {
+    e.preventDefault();
+    const nome   = document.getElementById("nome").value.trim();
+    const wpp    = document.getElementById("wpp").value.trim();
+    const qtd    = parseInt(document.getElementById("qtd").value);
+    const origem = document.getElementById("origem").value;
+    const erro   = document.getElementById("erro");
+    const btn    = document.getElementById("btn-submit");
+
+    erro.style.display = "none";
+    if (totalOcupado + qtd > LIMITE) {
+      erro.textContent = `Restam apenas ${LIMITE - totalOcupado} vaga(s). Ajuste o número de pessoas.`;
+      erro.style.display = "block";
+      return;
+    }
+    btn.disabled = true;
+    btn.textContent = "Registrando…";
+    try {
+      await addDoc(col, { nome, wpp, qtd, origem, criadoEm: new Date().toISOString() });
+      document.getElementById("section-form").style.display    = "none";
+      document.getElementById("section-sucesso").style.display = "block";
+    } catch(err) {
+      erro.textContent = "Erro ao registrar. Tente novamente.";
+      erro.style.display = "block";
+      btn.disabled = false;
+      btn.textContent = "Confirmar minha presença";
+    }
+  };
+</script>
+</body>
+</html>

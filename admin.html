@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Al-qui-mia · Painel</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=Jost:wght@300;400&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --cream:#F5EFE0; --parchment:#EDE3CC; --gold:#B8923A; --gold-lt:#D4AC5A;
+    --espresso:#2C1A0E; --mocha:#5C3A1E; --mist:#FAF6EE; --border:#D4C4A0;
+  }
+  body { background: var(--mist); font-family: 'Jost', sans-serif; font-weight: 300; color: var(--espresso); }
+
+  /* LOGIN */
+  .login-wrap { min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 2rem; }
+  .login-card { background: var(--mist); border: .5px solid var(--border); padding: 3rem 2.5rem; width: 100%; max-width: 380px; text-align: center; }
+  .login-brand { font-family: 'Cormorant Garamond', serif; font-size: 28px; font-weight: 300; color: var(--espresso); margin-bottom: .25rem; }
+  .login-brand em { font-style: italic; color: var(--gold); }
+  .login-sub { font-size: 10px; letter-spacing: .22em; text-transform: uppercase; color: var(--mocha); margin-bottom: 2rem; }
+  .login-field { display: flex; flex-direction: column; gap: 6px; margin-bottom: 1rem; text-align: left; }
+  .login-field label { font-size: 10px; letter-spacing: .22em; text-transform: uppercase; color: var(--mocha); }
+  .login-field input { width: 100%; height: 42px; padding: 0 14px; background: #FDFAF3; border: .5px solid var(--border); border-radius: 0; font-family: 'Jost', sans-serif; font-size: 14px; font-weight: 300; color: var(--espresso); outline: none; transition: border-color .2s; }
+  .login-field input:focus { border-color: var(--gold); }
+  .login-btn { width: 100%; padding: 13px; background: var(--espresso); color: var(--cream); border: none; font-family: 'Jost', sans-serif; font-size: 11px; font-weight: 400; letter-spacing: .3em; text-transform: uppercase; cursor: pointer; margin-top: .5rem; transition: background .2s; }
+  .login-btn:hover { background: var(--mocha); }
+  .login-erro { display: none; font-size: 12px; color: #8B2020; margin-top: .75rem; }
+
+  /* PAINEL */
+  .painel { display: none; }
+  .painel-hdr { background: var(--espresso); padding: 1.25rem 2rem; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--gold); }
+  .painel-hdr-brand { font-family: 'Cormorant Garamond', serif; font-size: 20px; font-weight: 300; font-style: italic; color: var(--cream); letter-spacing: .08em; }
+  .painel-hdr-brand span { font-style: normal; font-size: 10px; color: var(--gold); letter-spacing: .2em; margin-left: 10px; text-transform: uppercase; }
+  .btn-sair { background: transparent; border: .5px solid var(--gold); color: var(--gold); padding: 6px 16px; font-family: 'Jost', sans-serif; font-size: 10px; letter-spacing: .2em; text-transform: uppercase; cursor: pointer; transition: background .2s, color .2s; }
+  .btn-sair:hover { background: var(--gold); color: var(--espresso); }
+
+  .painel-body { max-width: 960px; margin: 0 auto; padding: 2rem 1.5rem 3rem; }
+
+  .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px; margin-bottom: 1.75rem; }
+  .stat-card { background: var(--parchment); border: .5px solid var(--border); padding: 1.25rem 1rem; text-align: center; }
+  .stat-val { font-family: 'Cormorant Garamond', serif; font-size: 38px; font-weight: 300; color: var(--espresso); line-height: 1; margin-bottom: 6px; }
+  .stat-val.gold { color: var(--gold); }
+  .stat-lbl { font-size: 9px; letter-spacing: .22em; text-transform: uppercase; color: var(--mocha); }
+
+  .prog-wrap { margin-bottom: 1.75rem; }
+  .prog-lbl { display: flex; justify-content: space-between; font-size: 10px; letter-spacing: .18em; text-transform: uppercase; color: var(--mocha); margin-bottom: 8px; }
+  .prog-track { height: 3px; background: var(--parchment); }
+  .prog-fill { height: 3px; background: var(--gold); transition: width .6s ease; }
+
+  .actions { display: flex; gap: 10px; margin-bottom: 1.25rem; flex-wrap: wrap; }
+  .busca-wrap { flex: 1; min-width: 200px; }
+  .busca-wrap input { width: 100%; height: 38px; padding: 0 12px; background: #FDFAF3; border: .5px solid var(--border); border-radius: 0; font-family: 'Jost', sans-serif; font-size: 13px; font-weight: 300; color: var(--espresso); outline: none; }
+  .busca-wrap input:focus { border-color: var(--gold); }
+  .btn-csv { display: inline-flex; align-items: center; gap: 8px; padding: 9px 20px; border: .5px solid var(--gold); background: transparent; color: var(--gold); font-family: 'Jost', sans-serif; font-size: 10px; letter-spacing: .2em; text-transform: uppercase; cursor: pointer; white-space: nowrap; transition: background .2s, color .2s; }
+  .btn-csv:hover { background: var(--gold); color: var(--cream); }
+
+  .table-wrap { border: .5px solid var(--border); overflow-x: auto; }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; table-layout: fixed; }
+  thead { background: var(--espresso); }
+  thead th { padding: 10px 14px; text-align: left; font-size: 9px; letter-spacing: .22em; text-transform: uppercase; color: var(--gold-lt); font-weight: 400; white-space: nowrap; overflow: hidden; }
+  tbody tr { border-bottom: .5px solid var(--border); }
+  tbody tr:last-child { border-bottom: none; }
+  tbody tr:hover { background: #FAF5EA; }
+  tbody td { padding: 10px 14px; color: var(--espresso); font-weight: 300; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .badge { display: inline-block; padding: 2px 8px; font-size: 10px; background: var(--parchment); color: var(--mocha); border: .5px solid var(--border); }
+  .empty-row td { text-align: center; padding: 2.5rem; font-family: 'Cormorant Garamond', serif; font-style: italic; color: var(--mocha); font-size: 15px; }
+
+  @media (max-width: 600px) {
+    .painel-hdr { flex-direction: column; gap: 12px; text-align: center; }
+    .actions { flex-direction: column; }
+  }
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div class="login-wrap" id="tela-login">
+  <div class="login-card">
+    <div class="login-brand">Café <em>Al-qui-mia</em></div>
+    <div class="login-sub">Painel de confirmações</div>
+    <div class="login-field">
+      <label for="senha-input">Senha</label>
+      <input type="password" id="senha-input" placeholder="••••••••"
+        onkeydown="if(event.key==='Enter') entrar()">
+    </div>
+    <button class="login-btn" onclick="entrar()">Entrar</button>
+    <div class="login-erro" id="login-erro">Senha incorreta.</div>
+  </div>
+</div>
+
+<!-- PAINEL -->
+<div class="painel" id="tela-painel">
+  <div class="painel-hdr">
+    <div class="painel-hdr-brand">Al-qui-mia <span>painel</span></div>
+    <button class="btn-sair" onclick="sair()">Sair</button>
+  </div>
+
+  <div class="painel-body">
+    <div class="stats">
+      <div class="stat-card">
+        <div class="stat-val gold" id="s-confirmados">—</div>
+        <div class="stat-lbl">Confirmações</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-val" id="s-pessoas">—</div>
+        <div class="stat-lbl">Total pessoas</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-val" id="s-livres">—</div>
+        <div class="stat-lbl">Vagas livres</div>
+      </div>
+    </div>
+
+    <div class="prog-wrap">
+      <div class="prog-lbl">
+        <span>Ocupação</span>
+        <span id="prog-pct">0%</span>
+      </div>
+      <div class="prog-track">
+        <div class="prog-fill" id="prog-fill" style="width:0%"></div>
+      </div>
+    </div>
+
+    <div class="actions">
+      <div class="busca-wrap">
+        <input type="text" id="busca" placeholder="Buscar por nome ou WhatsApp…" oninput="filtrar()">
+      </div>
+      <button class="btn-csv" onclick="exportarCSV()">↓ Exportar CSV</button>
+    </div>
+
+    <div class="table-wrap">
+      <table>
+        <colgroup>
+          <col style="width:40px">
+          <col style="width:30%">
+          <col style="width:25%">
+          <col style="width:70px">
+          <col style="width:20%">
+          <col style="width:20%">
+        </colgroup>
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Nome</th>
+            <th>WhatsApp</th>
+            <th>Pessoas</th>
+            <th>Origem</th>
+            <th>Confirmado em</th>
+          </tr>
+        </thead>
+        <tbody id="tabela-body">
+          <tr class="empty-row"><td colspan="6">Carregando…</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-app.js";
+  import { getFirestore, collection, onSnapshot, query, orderBy }
+    from "https://www.gstatic.com/firebasejs/11.0.0/firebase-firestore.js";
+
+  const firebaseConfig = {
+    apiKey:            "AIzaSyBe76lIVYlw2FrFytDA74HacROTGhyQs6k",
+    authDomain:        "alquimia-7dfd3.firebaseapp.com",
+    projectId:         "alquimia-7dfd3",
+    storageBucket:     "alquimia-7dfd3.firebasestorage.app",
+    messagingSenderId: "638103115384",
+    appId:             "1:638103115384:web:083c881afc8df705ba3f8d"
+  };
+
+  const SENHA_ADMIN = "0866";
+  const LIMITE      = 30;
+
+  const app = initializeApp(firebaseConfig);
+  const db  = getFirestore(app);
+  let todosRegistros = [];
+  let streamAtivo = false;
+
+  window.entrar = function() {
+    const v = document.getElementById("senha-input").value;
+    if (v === SENHA_ADMIN) {
+      document.getElementById("tela-login").style.display  = "none";
+      document.getElementById("tela-painel").style.display = "block";
+      if (!streamAtivo) { iniciarStream(); streamAtivo = true; }
+    } else {
+      document.getElementById("login-erro").style.display = "block";
+    }
+  };
+
+  window.sair = function() {
+    document.getElementById("tela-login").style.display  = "flex";
+    document.getElementById("tela-painel").style.display = "none";
+    document.getElementById("senha-input").value = "";
+    document.getElementById("login-erro").style.display = "none";
+  };
+
+  function iniciarStream() {
+    const q = query(collection(db, "confirmacoes"), orderBy("criadoEm", "desc"));
+    onSnapshot(q, (snap) => {
+      todosRegistros = snap.docs.map((d, i) => ({ seq: i + 1, ...d.data() }));
+      renderizarTabela(todosRegistros);
+      atualizarStats(todosRegistros);
+    });
+  }
+
+  function atualizarStats(rows) {
+    const pessoas = rows.reduce((s, r) => s + (r.qtd || 1), 0);
+    const livres  = Math.max(LIMITE - pessoas, 0);
+    const pct     = Math.min(Math.round((pessoas / LIMITE) * 100), 100);
+    document.getElementById("s-confirmados").textContent = rows.length;
+    document.getElementById("s-pessoas").textContent     = pessoas;
+    document.getElementById("s-livres").textContent      = livres;
+    document.getElementById("prog-fill").style.width     = pct + "%";
+    document.getElementById("prog-pct").textContent      = pct + "%";
+  }
+
+  function renderizarTabela(rows) {
+    const tbody = document.getElementById("tabela-body");
+    if (!rows.length) {
+      tbody.innerHTML = `<tr class="empty-row"><td colspan="6">Nenhuma confirmação ainda.</td></tr>`;
+      return;
+    }
+    tbody.innerHTML = rows.map((r, i) => {
+      const dt = r.criadoEm
+        ? new Date(r.criadoEm).toLocaleString("pt-BR", { dateStyle:"short", timeStyle:"short" })
+        : "—";
+      return `<tr>
+        <td style="color:var(--mocha)">${i + 1}</td>
+        <td style="font-weight:400">${esc(r.nome || "—")}</td>
+        <td>${esc(r.wpp || "—")}</td>
+        <td><span class="badge">${r.qtd || 1}</span></td>
+        <td style="color:var(--mocha)">${esc(r.origem || "—")}</td>
+        <td style="color:var(--mocha)">${dt}</td>
+      </tr>`;
+    }).join("");
+  }
+
+  window.filtrar = function() {
+    const q = document.getElementById("busca").value.toLowerCase();
+    renderizarTabela(
+      todosRegistros.filter(r =>
+        (r.nome || "").toLowerCase().includes(q) ||
+        (r.wpp  || "").toLowerCase().includes(q)
+      )
+    );
+  };
+
+  window.exportarCSV = function() {
+    const linhas = [
+      ["#","Nome","WhatsApp","Pessoas","Origem","Confirmado em"],
+      ...todosRegistros.map((r, i) => [
+        i + 1, r.nome || "", r.wpp || "", r.qtd || 1, r.origem || "",
+        r.criadoEm ? new Date(r.criadoEm).toLocaleString("pt-BR") : ""
+      ])
+    ];
+    const csv  = linhas.map(l => l.map(c => `"${String(c).replace(/"/g,'""')}"`).join(",")).join("\n");
+    const blob = new Blob(["\uFEFF" + csv], { type: "text/csv;charset=utf-8;" });
+    const url  = URL.createObjectURL(blob);
+    const a    = document.createElement("a"); a.href = url;
+    a.download = `alquimia-confirmacoes-${new Date().toISOString().slice(0,10)}.csv`;
+    a.click(); URL.revokeObjectURL(url);
+  };
+
+  function esc(s) {
+    return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+  }
+</script>
+</body>
+</html>
