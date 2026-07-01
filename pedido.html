@@ -288,7 +288,7 @@ window.identificar = async () => {
 window.enviarPedido = async () => {
   const itens = Object.entries(carrinho)
     .filter(([,v])=>v.qtd>0)
-    .map(([nome,v])=>({ nome, preco:v.preco, qtd:v.qtd, hora:new Date().toISOString() }));
+    .map(([nome,v])=>({ id: crypto.randomUUID(), nome, preco:v.preco, qtd:v.qtd, status:"pendente", hora:new Date().toISOString() }));
   if(!itens.length) return;
   const total = itens.reduce((s,i)=>s+(i.preco*i.qtd),0);
 
