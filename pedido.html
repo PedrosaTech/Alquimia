@@ -160,7 +160,7 @@ body{background:var(--perg-lt);font-family:'Jost',sans-serif;font-weight:300;col
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-app.js";
-import { getFirestore, collection, addDoc, query, where, getDocs, updateDoc, doc, arrayUnion, increment }
+import { getFirestore, collection, addDoc, query, where, getDocs, updateDoc, doc, arrayUnion, increment, getDoc }
   from "https://www.gstatic.com/firebasejs/11.0.0/firebase-firestore.js";
 
 const firebaseConfig = {
@@ -290,13 +290,21 @@ window.enviarPedido = async () => {
   const total = itens.reduce((s,i)=>s+(i.preco*i.qtd),0);
 
   try {
+    // sempre verifica se a comanda atual ainda está aberta
     if(comandaId){
+      const snap = await getDoc(doc(db,"comandas",comandaId));
+      // se comanda foi fechada ou não existe, descarta o id — vai criar nova abaixo
+      if(!snap.exists() || snap.data().status !== "aberta") comandaId = "";
+    }
+
+    if(comandaId){
+      // comanda aberta existe — adiciona normalmente
       await updateDoc(doc(db,"comandas",comandaId),{
         itens: arrayUnion(...itens),
         total: increment(total)
       });
     } else {
-      // cria comanda nova se não tiver check-in prévio
+      // comanda fechada ou inexistente — cria nova
       const ref = await addDoc(collection(db,"comandas"),{
         nome: nomeCliente, wpp:"", qtd:1,
         status:"aberta", itens, total,
@@ -317,6 +325,7 @@ window.enviarPedido = async () => {
     document.getElementById("tela-cardapio").style.display = "none";
     document.getElementById("tela-conf").style.display = "flex";
   } catch(e){
+    console.error(e);
     alert("Erro ao enviar pedido. Tente novamente.");
   }
 };
