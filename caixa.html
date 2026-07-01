@@ -107,9 +107,9 @@ body{background:var(--bg);font-family:'Jost',sans-serif;font-weight:300;color:va
     <div class="login-sub">Caixa · Barista</div>
     <div class="login-field">
       <label>Senha</label>
-      <input type="password" id="senha" placeholder="••••••" onkeydown="if(event.key==='Enter')entrar()">
+      <input type="password" id="senha" placeholder="••••••" onkeydown="if(event.key==='Enter')window.entrar&&window.window.entrar()">
     </div>
-    <button class="btn-login" onclick="entrar()">Entrar</button>
+    <button class="btn-login" onclick="window.entrar&&window.entrar()">Entrar</button>
     <div class="login-erro" id="login-erro">Senha incorreta.</div>
   </div>
 </div>
@@ -119,8 +119,8 @@ body{background:var(--bg);font-family:'Jost',sans-serif;font-weight:300;color:va
   <div class="hdr">
     <div class="hdr-brand">Al-qui-mia <span>caixa</span></div>
     <div class="hdr-acoes">
-      <button class="btn-sm" onclick="exportarCSV()">↓ CSV</button>
-      <button class="btn-sm" onclick="sair()">Sair</button>
+      <button class="btn-sm" onclick="window.exportarCSV()">↓ CSV</button>
+      <button class="btn-sm" onclick="window.sair&&window.sair()">Sair</button>
     </div>
   </div>
 
@@ -131,9 +131,9 @@ body{background:var(--bg);font-family:'Jost',sans-serif;font-weight:300;color:va
     </div>
 
     <div class="tabs">
-      <div class="tab ativa" onclick="mudarTab(0)">Abertas</div>
-      <div class="tab" onclick="mudarTab(1)">Fechadas</div>
-      <div class="tab" onclick="mudarTab(2)">Resumo</div>
+      <div class="tab ativa" onclick="window.mudarTab(0)">Abertas</div>
+      <div class="tab" onclick="window.mudarTab(1)">Fechadas</div>
+      <div class="tab" onclick="window.mudarTab(2)">Resumo</div>
     </div>
 
     <div id="tab-abertas"></div>
@@ -144,6 +144,18 @@ body{background:var(--bg);font-family:'Jost',sans-serif;font-weight:300;color:va
 
 <div class="toast" id="toast"></div>
 
+<script>
+// garante que funções existem antes do módulo carregar
+  window.entrar = function(){console.warn("entrar ainda carregando...")};
+  window.sair = function(){console.warn("sair ainda carregando...");};
+  window.exportarCSV = function(){console.warn("exportarCSV ainda carregando...")};
+  window.fecharComanda = function(){console.warn("fecharComanda ainda carregando...")};
+  window.mudarTab = function(){console.warn("mudarTab ainda carregando...")};
+  window.r = function(){console.warn("r ainda carregando...")};
+  window.selPgto = function(){console.warn("selPgto ainda carregando...")};
+  window.toggleComanda = function(){console.warn("toggleComanda ainda carregando...")};
+  window.toggleItem = function(){console.warn("toggleItem ainda carregando...")};
+</script>
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-app.js";
 import { getFirestore, collection, onSnapshot, doc, updateDoc, query, orderBy, arrayRemove, arrayUnion }
@@ -219,7 +231,7 @@ function comandaHtml(c, aberta){
     const btnTxt = pronto ? "✓" : "○";
     return `<div class="item-linha">
       <div class="item-linha-esq">
-        <button class="item-status-btn ${btnCls}" onclick="toggleItem('${c.id}','${i.id}')" title="${pronto?'Marcar pendente':'Marcar pronto'}">${btnTxt}</button>
+        <button class="item-status-btn ${btnCls}" onclick="window.toggleItem('${c.id}','${i.id}')" title="${pronto?'Marcar pendente':'Marcar pronto'}">${btnTxt}</button>
         <span class="item-linha-nome" style="${pronto?'opacity:.45;text-decoration:line-through':''}">${esc(i.nome)}<span class="item-linha-qtd">×${i.qtd}</span></span>
       </div>
       <span class="item-linha-preco" style="${pronto?'opacity:.45':''}">R$ ${i.preco*i.qtd}</span>
@@ -228,18 +240,18 @@ function comandaHtml(c, aberta){
 
   const pgtoOpts = aberta ? `
     <div class="pgto-sel">
-      <div class="pgto-opt ${pgtoSel[c.id]==='pix'?'sel':''}" onclick="selPgto('${c.id}','pix')">Pix</div>
-      <div class="pgto-opt ${pgtoSel[c.id]==='debito'?'sel':''}" onclick="selPgto('${c.id}','debito')">Débito</div>
-      <div class="pgto-opt ${pgtoSel[c.id]==='credito'?'sel':''}" onclick="selPgto('${c.id}','credito')">Crédito</div>
-      <div class="pgto-opt ${pgtoSel[c.id]==='dinheiro'?'sel':''}" onclick="selPgto('${c.id}','dinheiro')">Dinheiro</div>
+      <div class="pgto-opt ${pgtoSel[c.id]==='pix'?'sel':''}" onclick="window.selPgto('${c.id}','pix')">Pix</div>
+      <div class="pgto-opt ${pgtoSel[c.id]==='debito'?'sel':''}" onclick="window.selPgto('${c.id}','debito')">Débito</div>
+      <div class="pgto-opt ${pgtoSel[c.id]==='credito'?'sel':''}" onclick="window.selPgto('${c.id}','credito')">Crédito</div>
+      <div class="pgto-opt ${pgtoSel[c.id]==='dinheiro'?'sel':''}" onclick="window.selPgto('${c.id}','dinheiro')">Dinheiro</div>
     </div>
     <div class="comanda-acoes">
-      <button class="btn-fechar" onclick="fecharComanda('${c.id}')">Fechar comanda</button>
+      <button class="btn-fechar" onclick="window.fecharComanda('${c.id}')">Fechar comanda</button>
     </div>` : `<div style="font-size:14px;letter-spacing:.15em;text-transform:uppercase;color:var(--verde);margin-top:8px">✓ Pago via ${c.pagamento||"—"}</div>`;
 
   return `
   <div class="comanda" id="com-${c.id}">
-    <div class="comanda-hdr" onclick="toggleComanda('${c.id}')">
+    <div class="comanda-hdr" onclick="window.toggleComanda('${c.id}')">
       <div>
         <div class="comanda-nome">${esc(c.nome)}</div>
         <div class="comanda-status">${aberta?"Aberta":"Fechada"} · ${c.qtd||1} pessoa(s)</div>
@@ -361,5 +373,6 @@ window.toggleItem = async (comandaId, itemId) => {
 }
 function esc(s){ return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
 </script>
+
 </body>
 </html>
