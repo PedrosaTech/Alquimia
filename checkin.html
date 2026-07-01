@@ -93,9 +93,9 @@ body{background:var(--bg);font-family:'Jost',sans-serif;font-weight:300;color:va
     <div class="login-sub">Check-in · Barista</div>
     <div class="login-field">
       <label>Senha</label>
-      <input type="password" id="senha" placeholder="••••••" onkeydown="if(event.key==='Enter')entrar()">
+      <input type="password" id="senha" placeholder="••••••" onkeydown="if(event.key==='Enter')window.entrar&&window.window.entrar()">
     </div>
-    <button class="btn-login" onclick="entrar()">Entrar</button>
+    <button class="btn-login" onclick="window.entrar&&window.entrar()">Entrar</button>
     <div class="login-erro" id="login-erro">Senha incorreta.</div>
   </div>
 </div>
@@ -104,7 +104,7 @@ body{background:var(--bg);font-family:'Jost',sans-serif;font-weight:300;color:va
 <div class="painel" id="tela-painel">
   <div class="hdr">
     <div class="hdr-brand">Al-qui-mia <span>check-in</span></div>
-    <button class="btn-sair" onclick="sair()">Sair</button>
+    <button class="btn-sair" onclick="window.sair&&window.sair()">Sair</button>
   </div>
 
   <div class="body">
@@ -136,7 +136,7 @@ body{background:var(--bg);font-family:'Jost',sans-serif;font-weight:300;color:va
           </select>
         </div>
       </div>
-      <button class="btn-add" onclick="adicionarAvulso()">+ Registrar chegada</button>
+      <button class="btn-add" onclick="window.adicionarAvulso()">+ Registrar chegada</button>
     </div>
 
     <div class="busca-wrap">
@@ -150,6 +150,14 @@ body{background:var(--bg);font-family:'Jost',sans-serif;font-weight:300;color:va
 
 <div class="toast" id="toast"></div>
 
+<script>
+// garante que funções existem antes do módulo carregar
+  window.entrar = function(){console.warn("entrar ainda carregando...")};
+  window.sair = function(){console.warn("sair ainda carregando...");};
+  window.adicionarAvulso = function(){console.warn("adicionarAvulso ainda carregando...")};
+  window.fazerCheckin = function(){console.warn("fazerCheckin ainda carregando...")};
+  window.r = function(){console.warn("r ainda carregando...")};
+</script>
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-app.js";
 import { getFirestore, collection, onSnapshot, doc, updateDoc, addDoc, query, orderBy }
@@ -212,7 +220,7 @@ function renderizar(rows){
         <div class="conv-wpp">${esc(r.wpp||"")} ${r.qtd>1?`<span class="conv-qtd">· ${r.qtd} pessoas</span>`:""}</div>
         ${feito ? `<div class="conv-hora">✓ Check-in às ${hora}</div>` : ""}
       </div>
-      <button class="btn-checkin ${feito?"feito":""}" onclick="fazerCheckin('${r.id}')" ${feito?"disabled":""}>
+      <button class="btn-checkin ${feito?"feito":""}" onclick="window.fazerCheckin('${r.id}')" ${feito?"disabled":""}>
         ${feito ? "Presente" : "Check-in"}
       </button>
     </div>`;
@@ -280,5 +288,6 @@ function mostrarToast(msg){
 }
 function esc(s){ return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
 </script>
+
 </body>
 </html>
