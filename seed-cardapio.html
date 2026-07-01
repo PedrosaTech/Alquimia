@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>Seed Cardápio · Al-qui-mia</title>
+<style>
+body{font-family:sans-serif;padding:2rem;background:#1A120A;color:#F2EAD8}
+button{padding:12px 24px;background:#D4A843;color:#1A120A;border:none;font-size:16px;cursor:pointer;margin-top:1rem}
+#log{margin-top:1rem;font-size:13px;line-height:1.8;color:#C8A878}
+</style>
+</head>
+<body>
+<h2>Seed do Cardápio — Café Al-qui-mia</h2>
+<p>Clique para popular o Firestore com o cardápio inicial.<br>
+<strong>Execute apenas uma vez.</strong></p>
+<button onclick="seed()">Popular cardápio no Firestore</button>
+<div id="log"></div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-app.js";
+import { getFirestore, collection, addDoc, setDoc, doc }
+  from "https://www.gstatic.com/firebasejs/11.0.0/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey:"AIzaSyBe76lIVYlw2FrFytDA74HacROTGhyQs6k",
+  authDomain:"alquimia-7dfd3.firebaseapp.com",
+  projectId:"alquimia-7dfd3",
+  storageBucket:"alquimia-7dfd3.firebasestorage.app",
+  messagingSenderId:"638103115384",
+  appId:"1:638103115384:web:083c881afc8df705ba3f8d"
+};
+const app = initializeApp(firebaseConfig);
+const db  = getFirestore(app);
+
+const ITENS = [
+  {cat:"quentes",nome:"Café Coado da Chapada",desc:"Grão da Chapada Diamantina, coado na hora com água de poço natural",preco:8,ativo:true},
+  {cat:"quentes",nome:"Café Alquímico",desc:"Café coado, leite de coco orgânico e canela colhida no Espaço — assinatura da casa",preco:16,ativo:true},
+  {cat:"quentes",nome:"Chá do Quintal",desc:"Capim-limão e erva-cidreira frescos do Mangará, água de poço natural",preco:10,ativo:true},
+  {cat:"quentes",nome:"Chá do Cravo com Canela",desc:"Folhas de cravo e canela da casa, infusão lenta em água de poço",preco:10,ativo:true},
+  {cat:"quentes",nome:"Chá de Nibs de Cacau",desc:"Infusão de nibs de cacau em água de poço — levemente amargo e reconfortante",preco:12,ativo:true},
+  {cat:"frias",nome:"Café Gelado do Mangará",desc:"Café coado da Chapada resfriado, leite de coco orgânico e canela da casa",preco:18,ativo:true},
+  {cat:"frias",nome:"Suco de Banana com Limão",desc:"Banana orgânica do Espaço, limão taiti ou galego — cremoso, sem adição de água",preco:14,ativo:true},
+  {cat:"frias",nome:"Água de Coco Natural",desc:"Colhida no Espaço Terapêutico Mangará, servida gelada",preco:10,ativo:true},
+  {cat:"frias",nome:"Limonada do Quintal",desc:"Limão galego ou taiti, capim-limão fresco, água de poço natural gelada",preco:12,ativo:true},
+  {cat:"frias",nome:"Licor de Jenipapo",desc:"Produção artesanal da casa — dose única, encorpado e aromático",preco:16,ativo:true},
+  {cat:"frias",nome:"Drinque Alquimia",desc:"Licor de jenipapo, água de coco, limão galego e capim-limão — combinação da casa",preco:22,ativo:true},
+  {cat:"comes",nome:"Pão Integral do Mangará",desc:"Artesanal integral com manteiga de óleo de coco, azeite e especiarias",preco:16,ativo:true},
+  {cat:"comes",nome:"Pão com Ora-pro-nóbis",desc:"Integral enriquecido com ora-pro-nóbis colhida no Espaço — alto teor proteico",preco:18,ativo:true},
+  {cat:"comes",nome:"Pãozinho de Polvilho",desc:"Sem lactose, leve e crocante — assado na hora",preco:12,ativo:true},
+  {cat:"comes",nome:"Tábua da Casa",desc:"Pão integral + pão ora-pro-nóbis + polvilho, manteiga de coco e geleia — para 2",preco:38,ativo:true},
+  {cat:"comes",nome:"Maionese de Ora-pro-nóbis",desc:"Artesanal com ora-pro-nóbis fresca do Espaço — acompanha pão ou polvilho",preco:14,ativo:true},
+  {cat:"doces",nome:"Doce de Jaca",desc:"Preparo artesanal lento, jaca madura do Espaço",preco:12,ativo:true},
+  {cat:"doces",nome:"Doce de Banana",desc:"Banana orgânica do Mangará com canela e cravo da casa",preco:12,ativo:true},
+  {cat:"doces",nome:"Doce de Carambola",desc:"Carambola em calda artesanal — cítrico e delicado",preco:12,ativo:true},
+  {cat:"doces",nome:"Geleia de Jaca",desc:"Produção artesanal da casa — acompanha pão ou polvilho",preco:10,ativo:true},
+  {cat:"doces",nome:"Geleia de Uva com Maçã",desc:"Blend artesanal frutado com acidez equilibrada",preco:10,ativo:true},
+  {cat:"doces",nome:"Trio de Doces do Espaço",desc:"Uma porção de jaca, banana e carambola — para provar tudo",preco:30,ativo:true},
+];
+
+const log = document.getElementById("log");
+
+window.seed = async () => {
+  log.textContent = "Iniciando…\n";
+  try {
+    for(const item of ITENS){
+      await addDoc(collection(db,"cardapio"), item);
+      log.textContent += `✓ ${item.nome}\n`;
+    }
+    // Config inicial
+    await setDoc(doc(db,"config","evento"),{
+      limite: 30,
+      data: "18 de Julho",
+      hora: "15h às 21h"
+    });
+    log.textContent += "\n✅ Cardápio e config populados com sucesso!\nVocê pode fechar esta página.";
+  } catch(e) {
+    log.textContent += `\n❌ Erro: ${e.message}`;
+  }
+};
+</script>
+</body>
+</html>
