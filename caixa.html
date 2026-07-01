@@ -428,6 +428,8 @@ window.lancarItem = async (comandaId) => {
     alert("Erro ao lançar item.");
   }
 };
+
+window.toggleItem = async (comandaId, itemIdx) => {
   const comanda = todasComandas.find(c => c.id === comandaId);
   if(!comanda) return;
   const itens = comanda.itens || [];
