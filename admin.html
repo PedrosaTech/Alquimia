@@ -269,7 +269,7 @@ tbody td{padding:10px 14px;color:var(--espresso);font-weight:300;overflow:hidden
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-app.js";
 import {
   getFirestore, collection, onSnapshot, doc,
-  updateDoc, addDoc, setDoc, getDoc,
+  updateDoc, addDoc, setDoc,
   query, orderBy, deleteDoc
 } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-firestore.js";
 
@@ -474,15 +474,19 @@ window.salvarItem = async () => {
 };
 
 // ── CONFIGURAÇÕES ────────────────────────────────────────
-async function carregarConfig(){
-  const snap = await getDoc(doc(db,"config","evento"));
-  if(snap.exists()){
-    const d = snap.data();
-    limiteAtual = d.limite || LIMITE_PADRAO;
-    document.getElementById("cfg-vagas").value = limiteAtual;
-    if(d.data) document.getElementById("cfg-data").value = d.data;
-    if(d.hora) document.getElementById("cfg-hora").value = d.hora;
-  }
+function carregarConfig(){
+  onSnapshot(doc(db,"config","evento"), (snap) => {
+    if(snap.exists()){
+      const d = snap.data();
+      if(d.limite){
+        limiteAtual = d.limite;
+        atualizarStats(todosRegistros);
+        document.getElementById("cfg-vagas").value = limiteAtual;
+      }
+      if(d.data) document.getElementById("cfg-data").value = d.data;
+      if(d.hora) document.getElementById("cfg-hora").value = d.hora;
+    }
+  });
 }
 
 window.salvarVagas = async () => {
