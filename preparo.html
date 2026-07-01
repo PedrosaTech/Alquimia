@@ -102,9 +102,9 @@ body{background:var(--bg);font-family:'Jost',sans-serif;font-weight:300;color:va
     <div class="login-sub">Tela de Preparo</div>
     <div class="login-field">
       <label>Senha</label>
-      <input type="password" id="senha" placeholder="••••••" onkeydown="if(event.key==='Enter')entrar()">
+      <input type="password" id="senha" placeholder="••••••" onkeydown="if(event.key==='Enter')window.entrar&&window.window.entrar()">
     </div>
-    <button class="btn-login" onclick="entrar()">Entrar</button>
+    <button class="btn-login" onclick="window.entrar&&window.entrar()">Entrar</button>
     <div class="login-erro" id="login-erro">Senha incorreta.</div>
   </div>
 </div>
@@ -115,14 +115,14 @@ body{background:var(--bg);font-family:'Jost',sans-serif;font-weight:300;color:va
     <div class="hdr-brand">Al-qui-mia <span>preparo</span></div>
     <div class="hdr-right">
       <span class="pendentes-badge" id="badge-pendentes">0 pendentes</span>
-      <button class="btn-sair" onclick="sair()">Sair</button>
+      <button class="btn-sair" onclick="window.sair&&window.sair()">Sair</button>
     </div>
   </div>
 
   <div class="body">
     <div class="filtro-tabs">
-      <div class="ftab ativo" onclick="mudarFiltro('pendentes')">Com pendentes</div>
-      <div class="ftab" onclick="mudarFiltro('todas')">Todas abertas</div>
+      <div class="ftab ativo" onclick="window.mudarFiltro('pendentes')">Com pendentes</div>
+      <div class="ftab" onclick="window.mudarFiltro('todas')">Todas abertas</div>
     </div>
     <div id="lista-cards"></div>
   </div>
@@ -130,6 +130,15 @@ body{background:var(--bg);font-family:'Jost',sans-serif;font-weight:300;color:va
 
 <div class="toast" id="toast"></div>
 
+<script>
+// garante que funções existem antes do módulo carregar
+  window.entrar = function(){console.warn("entrar ainda carregando...")};
+  window.sair = function(){console.warn("sair ainda carregando...");};
+  window.marcarTudo = function(){console.warn("marcarTudo ainda carregando...")};
+  window.mudarFiltro = function(){console.warn("mudarFiltro ainda carregando...")};
+  window.r = function(){console.warn("r ainda carregando...")};
+  window.toggleItem = function(){console.warn("toggleItem ainda carregando...")};
+</script>
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-app.js";
 import { getFirestore, collection, onSnapshot, doc, updateDoc, arrayRemove, arrayUnion, query, orderBy }
@@ -209,7 +218,7 @@ function renderizar(){
       const pronto = i.status === "pronto";
       return `<div class="item-row ${pronto?"pronto":""}">
         <button class="marcar-btn ${pronto?"pronto":""}"
-          onclick="toggleItem('${c.id}','${i.id}')"
+          onclick="window.toggleItem('${c.id}','${i.id}')"
           title="${pronto?"Desmarcar":"Marcar como pronto"}">
           ${pronto ? "✓" : "○"}
         </button>
@@ -233,7 +242,7 @@ function renderizar(){
       </div>
       <div class="card-itens">${itensHtml || '<div style="font-style:italic;color:var(--mocha);padding:8px 0;font-size:14px">Aguardando pedidos…</div>'}</div>
       ${temPendente ? `<div class="card-footer">
-        <button class="btn-tudo" onclick="marcarTudo('${c.id}')">Marcar tudo como pronto</button>
+        <button class="btn-tudo" onclick="window.marcarTudo('${c.id}')">Marcar tudo como pronto</button>
       </div>` : ""}
     </div>`;
   }).join("");
@@ -284,5 +293,6 @@ function mostrarToast(msg){
 }
 function esc(s){ return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
 </script>
+
 </body>
 </html>
