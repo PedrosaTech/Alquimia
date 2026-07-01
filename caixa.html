@@ -64,11 +64,15 @@ body{background:var(--bg);font-family:'Jost',sans-serif;font-weight:300;color:va
 .comanda-status{font-size:12px;letter-spacing:.18em;text-transform:uppercase;color:var(--mocha)}
 .comanda-body{display:none;border-top:.5px solid var(--border);padding:12px 14px}
 .comanda-body.aberta{display:block}
-.item-linha{display:flex;justify-content:space-between;padding:5px 0;border-bottom:.5px solid var(--border);font-size:13px}
+.item-linha{display:flex;align-items:center;justify-content:space-between;padding:9px 0;border-bottom:.5px solid var(--border);font-size:16px;gap:8px}
 .item-linha:last-of-type{border-bottom:none}
+.item-linha-esq{display:flex;align-items:center;gap:10px;flex:1}
+.item-status-btn{width:28px;height:28px;border-radius:50%;border:1.5px solid var(--gold);background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;transition:all .2s}
+.item-status-btn.pronto{background:var(--verde);border-color:var(--verde);color:#fff}
+.item-status-btn.pendente{color:var(--gold)}
 .item-linha-nome{color:var(--text)}
-.item-linha-qtd{color:var(--mocha);margin-left:4px}
-.item-linha-preco{color:var(--gold);font-family:'Cormorant Garamond',serif;font-size:15px}
+.item-linha-qtd{color:var(--mocha);margin-left:3px;font-size:14px}
+.item-linha-preco{color:var(--gold);font-family:'Cormorant Garamond',serif;font-size:17px;white-space:nowrap}
 .comanda-footer{display:flex;justify-content:space-between;align-items:center;margin-top:12px;padding-top:10px;border-top:.5px solid var(--border)}
 .comanda-total-label{font-size:13px;letter-spacing:.2em;text-transform:uppercase;color:var(--mocha)}
 .comanda-total-val{font-family:'Cormorant Garamond',serif;font-size:22px;color:var(--text)}
@@ -142,7 +146,7 @@ body{background:var(--bg);font-family:'Jost',sans-serif;font-weight:300;color:va
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-app.js";
-import { getFirestore, collection, onSnapshot, doc, updateDoc, query, orderBy }
+import { getFirestore, collection, onSnapshot, doc, updateDoc, query, orderBy, arrayRemove, arrayUnion }
   from "https://www.gstatic.com/firebasejs/11.0.0/firebase-firestore.js";
 
 const firebaseConfig = {
@@ -209,12 +213,18 @@ function renderizarFechadas(lista){
 }
 
 function comandaHtml(c, aberta){
-  const itens = (c.itens||[]).map(i =>
-    `<div class="item-linha">
-      <span class="item-linha-nome">${esc(i.nome)}<span class="item-linha-qtd">×${i.qtd}</span></span>
-      <span class="item-linha-preco">R$ ${i.preco*i.qtd}</span>
-    </div>`
-  ).join("") || `<div style="font-style:italic;color:var(--mocha);font-size:13px">Nenhum item ainda.</div>`;
+  const itens = (c.itens||[]).map(i => {
+    const pronto = i.status === "pronto";
+    const btnCls = pronto ? "pronto" : "pendente";
+    const btnTxt = pronto ? "✓" : "○";
+    return `<div class="item-linha">
+      <div class="item-linha-esq">
+        <button class="item-status-btn ${btnCls}" onclick="toggleItem('${c.id}','${i.id}')" title="${pronto?'Marcar pendente':'Marcar pronto'}">${btnTxt}</button>
+        <span class="item-linha-nome" style="${pronto?'opacity:.45;text-decoration:line-through':''}">${esc(i.nome)}<span class="item-linha-qtd">×${i.qtd}</span></span>
+      </div>
+      <span class="item-linha-preco" style="${pronto?'opacity:.45':''}">R$ ${i.preco*i.qtd}</span>
+    </div>`;
+  }).join("") || `<div style="font-style:italic;color:var(--mocha);font-size:14px">Nenhum item ainda.</div>`;
 
   const pgtoOpts = aberta ? `
     <div class="pgto-sel">
@@ -328,7 +338,23 @@ window.exportarCSV = () => {
   a.click(); URL.revokeObjectURL(url);
 };
 
-function mostrarToast(msg){
+window.toggleItem = async (comandaId, itemId) => {
+  const comanda = todasComandas.find(c => c.id === comandaId);
+  if(!comanda) return;
+  const item = (comanda.itens||[]).find(i => i.id === itemId);
+  if(!item) return;
+  const novoStatus = item.status === "pronto" ? "pendente" : "pronto";
+  // remove o item antigo e insere atualizado
+  const itemAtualizado = {...item, status: novoStatus};
+  await updateDoc(doc(db,"comandas",comandaId),{
+    itens: arrayRemove(item)
+  });
+  await updateDoc(doc(db,"comandas",comandaId),{
+    itens: arrayUnion(itemAtualizado)
+  });
+};
+
+
   const t = document.getElementById("toast");
   t.textContent=msg; t.classList.add("show");
   setTimeout(()=>t.classList.remove("show"),3000);
