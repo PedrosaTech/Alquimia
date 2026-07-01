@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Preparo · Café Alquimia</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=Jost:wght@300;400&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#1A120A;--bg2:#241810;--bg3:#2E2018;
+  --gold:#D4A843;--gold-lt:#E8C870;
+  --text:#F2EAD8;--text2:#C8B88A;
+  --border:#4A3820;--verde:#4CAF70;
+  --vermelho:#CF5555;--mocha:#C8A878;
+  --pendente:#D4A843;--pronto:#4CAF70;
+}
+body{background:var(--bg);font-family:'Jost',sans-serif;font-weight:300;color:var(--text);min-height:100vh}
+
+/* LOGIN */
+.login-wrap{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:2rem}
+.login-card{background:var(--bg3);border:.5px solid var(--border);padding:2.5rem 2rem;width:100%;max-width:360px;text-align:center}
+.login-brand{font-family:'Cormorant Garamond',serif;font-size:26px;font-style:italic;color:var(--text);margin-bottom:.25rem}
+.login-brand em{color:var(--gold)}
+.login-sub{font-size:13px;letter-spacing:.22em;text-transform:uppercase;color:var(--mocha);margin-bottom:1.75rem}
+.login-field{display:flex;flex-direction:column;gap:6px;margin-bottom:1rem;text-align:left}
+.login-field label{font-size:12px;letter-spacing:.22em;text-transform:uppercase;color:var(--mocha)}
+.login-field input{width:100%;height:52px;padding:0 14px;background:var(--bg2);border:.5px solid var(--border);font-family:'Jost',sans-serif;font-size:18px;color:var(--text);outline:none;border-radius:0}
+.login-field input:focus{border-color:var(--gold)}
+.btn-login{width:100%;padding:14px;background:var(--gold);color:var(--bg);border:none;font-family:'Jost',sans-serif;font-size:13px;letter-spacing:.3em;text-transform:uppercase;cursor:pointer;margin-top:.5rem;font-weight:400}
+.login-erro{display:none;font-size:13px;color:var(--vermelho);margin-top:.75rem}
+
+/* PAINEL */
+.painel{display:none}
+.hdr{background:var(--bg);padding:1rem 1.25rem;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border);position:sticky;top:0;z-index:10}
+.hdr-brand{font-family:'Cormorant Garamond',serif;font-size:18px;font-style:italic;color:var(--text)}
+.hdr-brand span{font-style:normal;font-size:11px;color:var(--gold);letter-spacing:.2em;text-transform:uppercase;margin-left:8px}
+.hdr-right{display:flex;align-items:center;gap:12px}
+.pendentes-badge{background:var(--pendente);color:var(--bg);padding:4px 12px;font-size:13px;font-weight:400;letter-spacing:.05em;border-radius:2px}
+.btn-sair{background:transparent;border:.5px solid var(--border);color:var(--mocha);padding:6px 14px;font-family:'Jost',sans-serif;font-size:11px;letter-spacing:.18em;text-transform:uppercase;cursor:pointer}
+
+.body{max-width:700px;margin:0 auto;padding:1.25rem 1rem 3rem}
+
+/* filtro */
+.filtro-tabs{display:flex;background:var(--bg3);border:.5px solid var(--border);margin-bottom:1.25rem}
+.ftab{flex:1;padding:12px;text-align:center;font-size:13px;letter-spacing:.18em;text-transform:uppercase;color:var(--mocha);cursor:pointer;border-bottom:2px solid transparent;transition:all .2s}
+.ftab.ativo{color:var(--gold);border-bottom-color:var(--gold)}
+
+/* cards de pedido */
+.card{background:var(--bg3);border:.5px solid var(--border);margin-bottom:12px;overflow:hidden}
+.card.urgente{border-color:var(--pendente)}
+.card-hdr{display:flex;align-items:center;justify-content:space-between;padding:12px 14px;border-bottom:.5px solid var(--border)}
+.card-nome{font-family:'Cormorant Garamond',serif;font-size:20px;color:var(--text)}
+.card-hora{font-size:12px;color:var(--mocha);margin-top:2px}
+.card-badge{font-size:11px;letter-spacing:.12em;text-transform:uppercase;padding:4px 10px;border-radius:2px}
+.card-badge.tem-pendente{background:rgba(212,168,67,.15);color:var(--pendente);border:.5px solid var(--pendente)}
+.card-badge.tudo-pronto{background:rgba(76,175,112,.15);color:var(--pronto);border:.5px solid var(--pronto)}
+
+/* itens dentro do card */
+.card-itens{padding:8px 14px}
+.item-row{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:.5px solid var(--border)}
+.item-row:last-child{border-bottom:none}
+.item-row.pronto .item-nome{opacity:.4;text-decoration:line-through}
+.item-row.pronto .item-preco{opacity:.4}
+
+.marcar-btn{
+  width:44px;height:44px;border-radius:50%;
+  border:1.5px solid var(--gold);
+  background:transparent;
+  cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  font-size:20px;color:var(--gold);
+  flex-shrink:0;
+  transition:all .2s;
+  -webkit-tap-highlight-color:transparent;
+}
+.marcar-btn:active{transform:scale(.9)}
+.marcar-btn.pronto{background:var(--verde);border-color:var(--verde);color:#fff;font-size:18px}
+
+.item-info{flex:1}
+.item-nome{font-family:'Cormorant Garamond',serif;font-size:19px;color:var(--text);margin-bottom:2px}
+.item-qtd{font-size:13px;color:var(--mocha)}
+.item-preco{font-family:'Cormorant Garamond',serif;font-size:17px;color:var(--gold);white-space:nowrap}
+
+/* marcar tudo */
+.card-footer{padding:10px 14px;border-top:.5px solid var(--border);display:flex;justify-content:flex-end}
+.btn-tudo{padding:8px 18px;background:transparent;border:.5px solid var(--verde);color:var(--verde);font-family:'Jost',sans-serif;font-size:12px;letter-spacing:.18em;text-transform:uppercase;cursor:pointer;transition:background .2s,color .2s}
+.btn-tudo:hover{background:var(--verde);color:var(--bg)}
+
+.empty{text-align:center;padding:3rem;font-family:'Cormorant Garamond',serif;font-style:italic;color:var(--mocha);font-size:18px}
+
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--verde);color:#fff;padding:10px 24px;font-size:14px;opacity:0;transition:all .3s;pointer-events:none;white-space:nowrap;z-index:999;border-radius:2px}
+.toast.show{transform:translateX(-50%) translateY(0);opacity:1}
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div class="login-wrap" id="tela-login">
+  <div class="login-card">
+    <div class="login-brand">Café <em>Alquimia</em></div>
+    <div class="login-sub">Tela de Preparo</div>
+    <div class="login-field">
+      <label>Senha</label>
+      <input type="password" id="senha" placeholder="••••••" onkeydown="if(event.key==='Enter')entrar()">
+    </div>
+    <button class="btn-login" onclick="entrar()">Entrar</button>
+    <div class="login-erro" id="login-erro">Senha incorreta.</div>
+  </div>
+</div>
+
+<!-- PAINEL -->
+<div class="painel" id="tela-painel">
+  <div class="hdr">
+    <div class="hdr-brand">Al-qui-mia <span>preparo</span></div>
+    <div class="hdr-right">
+      <span class="pendentes-badge" id="badge-pendentes">0 pendentes</span>
+      <button class="btn-sair" onclick="sair()">Sair</button>
+    </div>
+  </div>
+
+  <div class="body">
+    <div class="filtro-tabs">
+      <div class="ftab ativo" onclick="mudarFiltro('pendentes')">Com pendentes</div>
+      <div class="ftab" onclick="mudarFiltro('todas')">Todas abertas</div>
+    </div>
+    <div id="lista-cards"></div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-app.js";
+import { getFirestore, collection, onSnapshot, doc, updateDoc, arrayRemove, arrayUnion, query, orderBy }
+  from "https://www.gstatic.com/firebasejs/11.0.0/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey:"AIzaSyBe76lIVYlw2FrFytDA74HacROTGhyQs6k",
+  authDomain:"alquimia-7dfd3.firebaseapp.com",
+  projectId:"alquimia-7dfd3",
+  storageBucket:"alquimia-7dfd3.firebasestorage.app",
+  messagingSenderId:"638103115384",
+  appId:"1:638103115384:web:083c881afc8df705ba3f8d"
+};
+const SENHA = "0866";
+const app = initializeApp(firebaseConfig);
+const db  = getFirestore(app);
+
+let todasComandas = [];
+let filtroAtivo = "pendentes";
+
+window.entrar = () => {
+  if(document.getElementById("senha").value === SENHA){
+    document.getElementById("tela-login").style.display = "none";
+    document.getElementById("tela-painel").style.display = "block";
+    iniciar();
+  } else {
+    document.getElementById("login-erro").style.display = "block";
+  }
+};
+window.sair = () => {
+  document.getElementById("tela-login").style.display = "flex";
+  document.getElementById("tela-painel").style.display = "none";
+};
+
+function iniciar(){
+  const q = query(collection(db,"comandas"), orderBy("aberta_em","asc"));
+  onSnapshot(q, snap => {
+    todasComandas = snap.docs.map(d => ({id:d.id,...d.data()}));
+    renderizar();
+  });
+}
+
+function renderizar(){
+  // só comandas abertas
+  let comandas = todasComandas.filter(c => c.status === "aberta");
+
+  // conta pendentes total
+  let totalPendentes = 0;
+  comandas.forEach(c => {
+    (c.itens||[]).forEach(i => { if(i.status !== "pronto") totalPendentes++; });
+  });
+  document.getElementById("badge-pendentes").textContent =
+    totalPendentes === 0 ? "Tudo pronto ✓" : `${totalPendentes} pendente${totalPendentes>1?"s":""}`;
+
+  // filtra
+  if(filtroAtivo === "pendentes"){
+    comandas = comandas.filter(c =>
+      (c.itens||[]).some(i => i.status !== "pronto")
+    );
+  }
+
+  const el = document.getElementById("lista-cards");
+
+  if(!comandas.length){
+    el.innerHTML = `<div class="empty">${filtroAtivo==="pendentes" ? "✓ Tudo atendido por enquanto." : "Nenhuma comanda aberta."}</div>`;
+    return;
+  }
+
+  el.innerHTML = comandas.map(c => {
+    const itens = c.itens || [];
+    const temPendente = itens.some(i => i.status !== "pronto");
+    const hora = c.aberta_em
+      ? new Date(c.aberta_em).toLocaleTimeString("pt-BR",{hour:"2-digit",minute:"2-digit"})
+      : "";
+
+    const itensHtml = itens.map(i => {
+      const pronto = i.status === "pronto";
+      return `<div class="item-row ${pronto?"pronto":""}">
+        <button class="marcar-btn ${pronto?"pronto":""}"
+          onclick="toggleItem('${c.id}','${i.id}')"
+          title="${pronto?"Desmarcar":"Marcar como pronto"}">
+          ${pronto ? "✓" : "○"}
+        </button>
+        <div class="item-info">
+          <div class="item-nome">${esc(i.nome)}</div>
+          <div class="item-qtd">quantidade: ${i.qtd}</div>
+        </div>
+        <div class="item-preco">R$ ${i.preco * i.qtd}</div>
+      </div>`;
+    }).join("");
+
+    return `<div class="card ${temPendente?"urgente":""}">
+      <div class="card-hdr">
+        <div>
+          <div class="card-nome">${esc(c.nome)}</div>
+          <div class="card-hora">Aberta às ${hora}</div>
+        </div>
+        <span class="card-badge ${temPendente?"tem-pendente":"tudo-pronto"}">
+          ${temPendente ? "Pendente" : "✓ Pronto"}
+        </span>
+      </div>
+      <div class="card-itens">${itensHtml || '<div style="font-style:italic;color:var(--mocha);padding:8px 0;font-size:14px">Aguardando pedidos…</div>'}</div>
+      ${temPendente ? `<div class="card-footer">
+        <button class="btn-tudo" onclick="marcarTudo('${c.id}')">Marcar tudo como pronto</button>
+      </div>` : ""}
+    </div>`;
+  }).join("");
+}
+
+window.mudarFiltro = (f) => {
+  filtroAtivo = f;
+  document.querySelectorAll(".ftab").forEach((t,i) => {
+    t.classList.toggle("ativo", (i===0 && f==="pendentes") || (i===1 && f==="todas"));
+  });
+  renderizar();
+};
+
+window.toggleItem = async (comandaId, itemId) => {
+  const comanda = todasComandas.find(c => c.id === comandaId);
+  if(!comanda) return;
+  const item = (comanda.itens||[]).find(i => i.id === itemId);
+  if(!item) return;
+  const novoStatus = item.status === "pronto" ? "pendente" : "pronto";
+  const itemAtualizado = {...item, status: novoStatus};
+  try{
+    await updateDoc(doc(db,"comandas",comandaId),{ itens: arrayRemove(item) });
+    await updateDoc(doc(db,"comandas",comandaId),{ itens: arrayUnion(itemAtualizado) });
+    if(novoStatus === "pronto") mostrarToast(`✓ ${item.nome} — pronto`);
+  }catch(e){ console.error(e); }
+};
+
+window.marcarTudo = async (comandaId) => {
+  const comanda = todasComandas.find(c => c.id === comandaId);
+  if(!comanda) return;
+  const itens = (comanda.itens||[]);
+  const pendentes = itens.filter(i => i.status !== "pronto");
+  if(!pendentes.length) return;
+  try{
+    for(const item of pendentes){
+      const atualizado = {...item, status:"pronto"};
+      await updateDoc(doc(db,"comandas",comandaId),{ itens: arrayRemove(item) });
+      await updateDoc(doc(db,"comandas",comandaId),{ itens: arrayUnion(atualizado) });
+    }
+    mostrarToast(`✓ Todos os itens de ${comanda.nome} marcados`);
+  }catch(e){ console.error(e); }
+};
+
+function mostrarToast(msg){
+  const t = document.getElementById("toast");
+  t.textContent = msg; t.classList.add("show");
+  setTimeout(() => t.classList.remove("show"), 2500);
+}
+function esc(s){ return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
+</script>
+</body>
+</html>
