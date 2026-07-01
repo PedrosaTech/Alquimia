@@ -8,36 +8,39 @@
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{
-  --perg:#E8DFC8;--perg-lt:#F2EAD8;--perg-dk:#D6C9AD;
-  --gold:#9A7A2E;--gold-lt:#C49A3C;--espresso:#2A1A08;
-  --mocha:#5A3A18;--olive:#4A5230;--border:#C8B88A;
-  --verde:#2D6A2D;
+  --bg:#1A120A;--bg2:#241810;--bg3:#2E2018;
+  --gold:#D4A843;--gold-lt:#E8C870;
+  --text:#F2EAD8;--text2:#C8B88A;
+  --border:#4A3820;--verde:#4CAF70;
+  --vermelho:#CF5555;--mocha:#C8A878;
+  --espresso:#1A120A;--perg:#2E2018;--perg-lt:#241810;
+  --perg-dk:#3A2818;--gold-lt:#E8C870;--olive:#3A4820;
 }
-body{background:var(--perg-lt);font-family:'Jost',sans-serif;font-weight:300;color:var(--espresso);padding-bottom:100px}
+body{background:var(--bg);font-family:'Jost',sans-serif;font-weight:300;color:var(--text);min-height:100vh}
 
 /* IDENTIFICAÇÃO */
 .ident-wrap{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:2rem}
-.ident-card{background:var(--perg);border:.5px solid var(--border);padding:2.5rem 1.75rem;width:100%;max-width:400px;text-align:center}
-.ident-brand{font-family:'Cormorant Garamond',serif;font-size:32px;font-style:italic;color:var(--espresso);margin-bottom:.25rem}
+.ident-card{background:var(--bg3);border:.5px solid var(--border);padding:2.5rem 1.75rem;width:100%;max-width:400px;text-align:center}
+.ident-brand{font-family:'Cormorant Garamond',serif;font-size:36px;font-style:italic;color:var(--text);margin-bottom:.25rem}
 .ident-brand em{color:var(--gold)}
-.ident-sub{font-size:12px;font-style:italic;color:var(--mocha);margin-bottom:2rem;letter-spacing:.06em}
+.ident-sub{font-size:16px;font-style:italic;color:var(--mocha);margin-bottom:2rem;letter-spacing:.06em}
 .ident-field{display:flex;flex-direction:column;gap:6px;margin-bottom:1rem;text-align:left}
-.ident-field label{font-size:10px;letter-spacing:.22em;text-transform:uppercase;color:var(--mocha)}
-.ident-field input{width:100%;height:48px;padding:0 14px;background:var(--perg-lt);border:.5px solid var(--border);font-family:'Jost',sans-serif;font-size:16px;color:var(--espresso);outline:none;border-radius:0}
+.ident-field label{font-size:13px;letter-spacing:.22em;text-transform:uppercase;color:var(--mocha)}
+.ident-field input{width:100%;height:56px;padding:0 14px;background:var(--bg2);border:.5px solid var(--border);font-family:'Jost',sans-serif;font-size:16px;color:var(--text);outline:none;border-radius:0}
 .ident-field input:focus{border-color:var(--gold)}
 .btn-ident{width:100%;padding:14px;background:var(--espresso);color:var(--perg-lt);border:none;font-family:'Cormorant Garamond',serif;font-size:16px;font-style:italic;letter-spacing:.12em;cursor:pointer;margin-top:.5rem}
 .ident-erro{display:none;font-size:12px;color:#8B2020;margin-top:.75rem;font-style:italic}
 
 /* CARDÁPIO */
 .cardapio{display:none}
-.hdr{background:var(--espresso);padding:1rem 1.25rem;text-align:center;border-bottom:1px solid var(--gold)}
+.hdr{background:var(--bg);padding:1rem 1.25rem;text-align:center;border-bottom:1px solid var(--gold)}
 .hdr-nome{font-family:'Cormorant Garamond',serif;font-size:14px;font-style:italic;color:var(--gold-lt);margin-bottom:2px}
 .hdr-brand{font-family:'Cormorant Garamond',serif;font-size:22px;font-style:italic;color:var(--perg-lt)}
 
 /* abas de categoria */
-.abas{display:flex;overflow-x:auto;background:var(--perg);border-bottom:.5px solid var(--border);-webkit-overflow-scrolling:touch;scrollbar-width:none}
+.abas{display:flex;overflow-x:auto;background:var(--bg3);border-bottom:.5px solid var(--border);-webkit-overflow-scrolling:touch;scrollbar-width:none}
 .abas::-webkit-scrollbar{display:none}
-.aba{flex-shrink:0;padding:10px 16px;font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--mocha);cursor:pointer;border-bottom:2px solid transparent;white-space:nowrap;transition:all .2s}
+.aba{flex-shrink:0;padding:10px 16px;font-size:14px;letter-spacing:.18em;text-transform:uppercase;color:var(--mocha);cursor:pointer;border-bottom:2px solid transparent;white-space:nowrap;transition:all .2s}
 .aba.ativa{color:var(--gold);border-bottom-color:var(--gold)}
 
 .body{max-width:500px;margin:0 auto;padding:1.25rem 1rem}
@@ -47,35 +50,35 @@ body{background:var(--perg-lt);font-family:'Jost',sans-serif;font-weight:300;col
 .sec-titulo{font-family:'Cormorant Garamond',serif;font-size:13px;letter-spacing:.3em;text-transform:uppercase;color:var(--gold);margin-bottom:1.25rem;display:flex;align-items:center;gap:10px}
 .sec-titulo::after{content:'';flex:1;height:.5px;background:var(--border)}
 
-.item{display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:.5px solid var(--perg-dk)}
+.item{display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:.5px solid var(--border)}
 .item:last-child{border-bottom:none}
 .item-info{flex:1}
-.item-nome{font-family:'Cormorant Garamond',serif;font-size:18px;color:var(--espresso);margin-bottom:3px}
-.item-desc{font-size:12px;font-style:italic;color:var(--mocha);line-height:1.5;margin-bottom:4px}
-.item-preco{font-family:'Cormorant Garamond',serif;font-size:16px;color:var(--gold)}
+.item-nome{font-family:'Cormorant Garamond',serif;font-size:18px;color:var(--text);margin-bottom:3px}
+.item-desc{font-size:15px;font-style:italic;color:var(--mocha);line-height:1.5;margin-bottom:4px}
+.item-preco{font-family:'Cormorant Garamond',serif;font-size:20px;color:var(--gold)}
 .item-tags{display:flex;gap:4px;flex-wrap:wrap;margin-top:3px}
-.tag{font-size:9px;letter-spacing:.1em;text-transform:uppercase;padding:2px 6px;border:.5px solid var(--border);color:var(--mocha)}
+.tag{font-size:12px;letter-spacing:.1em;text-transform:uppercase;padding:2px 6px;border:.5px solid var(--border);color:var(--mocha)}
 .tag.veg{border-color:#3A5228;color:#3A5228}
 
 /* controle de quantidade */
 .qtd-ctrl{display:flex;align-items:center;gap:0;flex-shrink:0}
-.qtd-btn{width:32px;height:32px;background:var(--perg-dk);border:.5px solid var(--border);font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--espresso);font-weight:300;user-select:none;-webkit-user-select:none}
+.qtd-btn{width:32px;height:32px;background:var(--bg);border:.5px solid var(--border);font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--text);font-weight:300;user-select:none;-webkit-user-select:none}
 .qtd-btn:active{background:var(--border)}
-.qtd-num{width:32px;height:32px;display:flex;align-items:center;justify-content:center;font-family:'Cormorant Garamond',serif;font-size:18px;color:var(--espresso);background:var(--perg-lt);border-top:.5px solid var(--border);border-bottom:.5px solid var(--border)}
+.qtd-num{width:40px;height:40px;display:flex;align-items:center;justify-content:center;font-family:'Cormorant Garamond',serif;font-size:18px;color:var(--text);background:var(--bg2);border-top:.5px solid var(--border);border-bottom:.5px solid var(--border)}
 
 /* carrinho fixo */
 .carrinho-bar{position:fixed;bottom:0;left:0;right:0;background:var(--espresso);padding:12px 1.25rem;display:none;align-items:center;justify-content:space-between;gap:12px;border-top:1px solid var(--gold);z-index:100}
 .carrinho-bar.visivel{display:flex}
 .carr-info{color:var(--perg-lt)}
-.carr-qtd{font-size:11px;letter-spacing:.15em;text-transform:uppercase;color:var(--gold-lt);margin-bottom:2px}
-.carr-total{font-family:'Cormorant Garamond',serif;font-size:22px;color:var(--perg-lt)}
+.carr-qtd{font-size:14px;letter-spacing:.15em;text-transform:uppercase;color:var(--gold-lt);margin-bottom:2px}
+.carr-total{font-family:'Cormorant Garamond',serif;font-size:26px;color:var(--text)}
 .btn-enviar{padding:11px 24px;background:var(--gold);color:var(--perg-lt);border:none;font-family:'Cormorant Garamond',serif;font-size:16px;font-style:italic;letter-spacing:.1em;cursor:pointer;white-space:nowrap}
 
 /* confirmação */
 .confirmacao{display:none;min-height:100vh;align-items:center;justify-content:center;padding:2rem}
-.conf-card{background:var(--perg);border:.5px solid var(--border);padding:3rem 2rem;max-width:400px;width:100%;text-align:center}
+.conf-card{background:var(--bg3);border:.5px solid var(--border);padding:3rem 2rem;max-width:400px;width:100%;text-align:center}
 .conf-icon{font-size:28px;color:var(--gold);margin-bottom:1rem;letter-spacing:.3em}
-.conf-titulo{font-family:'Cormorant Garamond',serif;font-size:28px;font-style:italic;color:var(--espresso);margin-bottom:.75rem}
+.conf-titulo{font-family:'Cormorant Garamond',serif;font-size:28px;font-style:italic;color:var(--text);margin-bottom:.75rem}
 .conf-msg{font-size:14px;font-style:italic;color:var(--mocha);line-height:1.9;margin-bottom:1.5rem}
 .btn-mais{padding:10px 24px;border:.5px solid var(--gold);background:transparent;color:var(--gold);font-family:'Cormorant Garamond',serif;font-size:14px;font-style:italic;letter-spacing:.1em;cursor:pointer}
 </style>
