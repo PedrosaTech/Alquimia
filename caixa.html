@@ -81,6 +81,15 @@ body{background:var(--bg);font-family:'Jost',sans-serif;font-weight:300;color:va
 .btn-fechar{flex:1;padding:14px;font-size:15px;background:var(--gold);color:var(--bg);border:none;color:var(--perg-lt);border:none;font-family:'Jost',sans-serif;font-size:14px;letter-spacing:.2em;text-transform:uppercase;cursor:pointer}
 .btn-fechar:hover{background:var(--mocha)}
 
+/* lançar item pelo atendente */
+.lancar-wrap{margin-top:10px;border-top:.5px solid var(--border);padding-top:10px}
+.lancar-titulo{font-size:12px;letter-spacing:.22em;text-transform:uppercase;color:var(--gold);margin-bottom:8px}
+.lancar-grid{display:grid;grid-template-columns:1fr auto;gap:6px;margin-bottom:6px}
+.lancar-select{height:44px;padding:0 12px;background:var(--bg2);border:.5px solid var(--border);font-family:'Jost',sans-serif;font-size:14px;color:var(--text);outline:none;appearance:none;-webkit-appearance:none;width:100%}
+.lancar-qtd{width:60px;height:44px;padding:0 8px;background:var(--bg2);border:.5px solid var(--border);font-family:'Jost',sans-serif;font-size:16px;color:var(--text);outline:none;text-align:center}
+.btn-lancar{width:100%;padding:10px;background:var(--bg2);border:.5px solid var(--gold);color:var(--gold);font-family:'Jost',sans-serif;font-size:12px;letter-spacing:.22em;text-transform:uppercase;cursor:pointer;transition:background .2s,color .2s}
+.btn-lancar:hover{background:var(--gold);color:var(--bg)}
+
 /* pgto */
 .pgto-sel{display:grid;grid-template-columns:repeat(2,1fr);gap:6px;margin-top:8px}
 .pgto-opt{padding:8px;border:.5px solid var(--border);text-align:center;cursor:pointer;font-size:15px;color:var(--mocha);letter-spacing:.1em;text-transform:uppercase}
@@ -149,6 +158,7 @@ body{background:var(--bg);font-family:'Jost',sans-serif;font-weight:300;color:va
 // garante que funções existem antes do módulo carregar
   window.entrar = function(){console.warn("entrar ainda carregando...")};
   window.sair = function(){console.warn("sair ainda carregando...");};
+  window.lancarItem = function(){console.warn("lancarItem ainda carregando...")};
   window.exportarCSV = function(){console.warn("exportarCSV ainda carregando...")};
   window.fecharComanda = function(){console.warn("fecharComanda ainda carregando...")};
   window.mudarTab = function(){console.warn("mudarTab ainda carregando...")};
@@ -248,6 +258,17 @@ function comandaHtml(c, aberta){
     </div>
     <div class="comanda-acoes">
       <button class="btn-fechar" onclick="window.fecharComanda('${c.id}')">Fechar comanda</button>
+    </div>
+    <div class="lancar-wrap">
+      <div class="lancar-titulo">+ Lançar item pelo atendente</div>
+      <div class="lancar-grid">
+        <select class="lancar-select" id="sel-${c.id}">
+          <option value="">Escolha o item…</option>
+          ${CARDAPIO.map(p=>`<option value="${p.nome}|${p.preco}">${p.nome} — R$ ${p.preco}</option>`).join('')}
+        </select>
+        <input class="lancar-qtd" type="number" min="1" max="10" value="1" id="qtd-${c.id}">
+      </div>
+      <button class="btn-lancar" onclick="window.lancarItem('${c.id}')">Adicionar à comanda</button>
     </div>` : `<div style="font-size:14px;letter-spacing:.15em;text-transform:uppercase;color:var(--verde);margin-top:8px">✓ Pago via ${c.pagamento||"—"}</div>`;
 
   return `
@@ -351,7 +372,61 @@ window.exportarCSV = () => {
   a.click(); URL.revokeObjectURL(url);
 };
 
-window.toggleItem = async (comandaId, itemIdx) => {
+const CARDAPIO = [
+  {nome:"Café Coado da Chapada", preco:8},
+  {nome:"Café Alquímico", preco:16},
+  {nome:"Chá do Quintal", preco:10},
+  {nome:"Chá do Cravo com Canela", preco:10},
+  {nome:"Chá de Nibs de Cacau", preco:12},
+  {nome:"Café Gelado do Mangará", preco:18},
+  {nome:"Suco de Banana com Limão", preco:14},
+  {nome:"Água de Coco Natural", preco:10},
+  {nome:"Limonada do Quintal", preco:12},
+  {nome:"Licor de Jenipapo", preco:16},
+  {nome:"Drinque Alquimia", preco:22},
+  {nome:"Pão Integral do Mangará", preco:16},
+  {nome:"Pão com Ora-pro-nóbis", preco:18},
+  {nome:"Pãozinho de Polvilho", preco:12},
+  {nome:"Tábua da Casa", preco:38},
+  {nome:"Maionese de Ora-pro-nóbis", preco:14},
+  {nome:"Doce de Jaca", preco:12},
+  {nome:"Doce de Banana", preco:12},
+  {nome:"Doce de Carambola", preco:12},
+  {nome:"Geleia de Jaca", preco:10},
+  {nome:"Geleia de Uva com Maçã", preco:10},
+  {nome:"Trio de Doces do Espaço", preco:30},
+];
+
+window.lancarItem = async (comandaId) => {
+  const sel = document.getElementById(`sel-${comandaId}`);
+  const qtdEl = document.getElementById(`qtd-${comandaId}`);
+  if(!sel || !sel.value) { alert("Escolha um item."); return; }
+  const [nome, precoStr] = sel.value.split("|");
+  const preco = parseFloat(precoStr);
+  const qtd   = parseInt(qtdEl?.value || 1);
+  const novoItem = {
+    nome, preco, qtd,
+    status: "pendente",
+    hora: new Date().toISOString(),
+    lancado_por: "atendente"
+  };
+  const comanda = todasComandas.find(c => c.id === comandaId);
+  if(!comanda) return;
+  const novosItens = [...(comanda.itens||[]), novoItem];
+  const novoTotal  = (comanda.total||0) + (preco * qtd);
+  try{
+    await updateDoc(doc(db,"comandas",comandaId),{
+      itens: novosItens,
+      total: novoTotal
+    });
+    mostrarToast(`✓ ${qtd}× ${nome} lançado`);
+    sel.value = "";
+    if(qtdEl) qtdEl.value = "1";
+  }catch(e){
+    console.error(e);
+    alert("Erro ao lançar item.");
+  }
+};
   const comanda = todasComandas.find(c => c.id === comandaId);
   if(!comanda) return;
   const itens = comanda.itens || [];
