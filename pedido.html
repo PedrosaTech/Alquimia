@@ -168,7 +168,7 @@ body{background:var(--bg);font-family:'Jost',sans-serif;font-weight:300;color:va
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-app.js";
-import { getFirestore, collection, addDoc, query, where, getDocs, updateDoc, doc, arrayUnion, increment, getDoc }
+import { getFirestore, collection, addDoc, query, where, getDocs, updateDoc, doc, arrayUnion, increment, getDoc, onSnapshot, orderBy }
   from "https://www.gstatic.com/firebasejs/11.0.0/firebase-firestore.js";
 
 const firebaseConfig = {
@@ -182,59 +182,44 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db  = getFirestore(app);
 
-// CARDÁPIO LOCAL
-const CARDAPIO = [
-  { cat:0, nome:"Café Coado da Chapada", desc:"Grão da Chapada Diamantina, coado na hora com água de poço natural", preco:8, tags:["vegano","água de poço"] },
-  { cat:0, nome:"Café Alquímico", desc:"Café coado, leite de coco orgânico e canela colhida no Espaço — assinatura da casa", preco:16, tags:["plant-based","assinatura"] },
-  { cat:0, nome:"Chá do Quintal", desc:"Capim-limão e erva-cidreira frescos do Mangará, água de poço natural", preco:10, tags:["vegano","colhido no espaço"] },
-  { cat:0, nome:"Chá do Cravo com Canela", desc:"Folhas de cravo e canela da casa, infusão lenta em água de poço", preco:10, tags:["vegano","colhido no espaço"] },
-  { cat:0, nome:"Chá de Nibs de Cacau", desc:"Infusão de nibs de cacau em água de poço — levemente amargo e reconfortante", preco:12, tags:["vegano","água de poço"] },
-  { cat:1, nome:"Café Gelado do Mangará", desc:"Café coado da Chapada resfriado, leite de coco orgânico e canela da casa", preco:18, tags:["plant-based"] },
-  { cat:1, nome:"Suco de Banana com Limão", desc:"Banana orgânica do Espaço, limão taiti ou galego — cremoso, sem adição de água", preco:14, tags:["vegano","colhido no espaço"] },
-  { cat:1, nome:"Água de Coco Natural", desc:"Colhida no Espaço Terapêutico Mangará, servida gelada", preco:10, tags:["vegano","colhida no espaço"] },
-  { cat:1, nome:"Limonada do Quintal", desc:"Limão galego ou taiti, capim-limão fresco, água de poço natural gelada", preco:12, tags:["vegano","água de poço"] },
-  { cat:1, nome:"Licor de Jenipapo", desc:"Produção artesanal da casa — dose única, encorpado e aromático", preco:16, tags:["artesanal","contém álcool"] },
-  { cat:1, nome:"Drinque Alquimia", desc:"Licor de jenipapo, água de coco, limão galego e capim-limão — combinação da casa", preco:22, tags:["assinatura","contém álcool"] },
-  { cat:2, nome:"Pão Integral do Mangará", desc:"Artesanal integral com manteiga de óleo de coco, azeite e especiarias", preco:16, tags:["plant-based","artesanal"] },
-  { cat:2, nome:"Pão com Ora-pro-nóbis", desc:"Integral enriquecido com ora-pro-nóbis colhida no Espaço — alto teor proteico", preco:18, tags:["plant-based","colhida no espaço"] },
-  { cat:2, nome:"Pãozinho de Polvilho", desc:"Sem lactose, leve e crocante — assado na hora", preco:12, tags:["vegano","sem lactose"] },
-  { cat:2, nome:"Tábua da Casa", desc:"Pão integral + pão ora-pro-nóbis + polvilho, manteiga de coco e geleia à escolha — para 2", preco:38, tags:["plant-based","para compartilhar"] },
-  { cat:2, nome:"Maionese de Ora-pro-nóbis", desc:"Artesanal com ora-pro-nóbis fresca do Espaço — acompanha pão ou polvilho", preco:14, tags:["plant-based","colhida no espaço"] },
-  { cat:3, nome:"Doce de Jaca", desc:"Preparo artesanal lento, jaca madura do Espaço", preco:12, tags:["vegano","colhida no espaço"] },
-  { cat:3, nome:"Doce de Banana", desc:"Banana orgânica do Mangará com canela e cravo da casa", preco:12, tags:["vegano","ingredientes do espaço"] },
-  { cat:3, nome:"Doce de Carambola", desc:"Carambola em calda artesanal — cítrico e delicado", preco:12, tags:["vegano","colhida no espaço"] },
-  { cat:3, nome:"Geleia de Jaca", desc:"Produção artesanal da casa — acompanha pão ou polvilho", preco:10, tags:["vegano","artesanal"] },
-  { cat:3, nome:"Geleia de Uva com Maçã", desc:"Blend artesanal frutado com acidez equilibrada", preco:10, tags:["vegano","artesanal"] },
-  { cat:3, nome:"Trio de Doces do Espaço", desc:"Uma porção de jaca, banana e carambola — para provar tudo", preco:30, tags:["vegano","para compartilhar"] },
-];
-
-let carrinho = {}; // {nome: {preco, qtd}}
-let nomeCliente = "";
-let comandaId = "";
-
-// Renderizar cardápio
-CARDAPIO.forEach(item => {
-  const el = document.getElementById(`items-${item.cat}`);
-  const id = item.nome.replace(/\s+/g,"-").toLowerCase();
-  const tagsHtml = item.tags.map(t => {
-    const isVeg = t.includes("vegano")||t.includes("plant")||t.includes("colhid");
-    return `<span class="tag ${isVeg?"veg":""}">${t}</span>`;
-  }).join("");
-  el.innerHTML += `
-  <div class="item">
-    <div class="item-info">
-      <div class="item-nome">${item.nome}</div>
-      <div class="item-desc">${item.desc}</div>
-      <div class="item-preco">R$ ${item.preco}</div>
-      <div class="item-tags">${tagsHtml}</div>
-    </div>
-    <div class="qtd-ctrl">
-      <div class="qtd-btn" onclick="decrementar('${item.nome}',${item.preco})">−</div>
-      <div class="qtd-num" id="qtd-${id}">0</div>
-      <div class="qtd-btn" onclick="incrementar('${item.nome}',${item.preco})">+</div>
-    </div>
-  </div>`;
+// Stream cardápio — atualiza em tempo real
+onSnapshot(query(collection(db,"cardapio"), orderBy("cat","asc")), snap => {
+  const itens = snap.docs.map(d => ({id:d.id,...d.data()}));
+  renderizarCardapio(itens);
 });
+
+// Config — limite de vagas dinâmico
+let LIMITE = 30;
+getDoc(doc(db,"config","evento")).then(snap => {
+  if(snap.exists() && snap.data().limite) LIMITE = snap.data().limite;
+}).catch(()=>{});
+
+// Cardápio dinâmico — carregado do Firestore
+const CATS_ORDER = ["quentes","frias","comes","doces"];
+
+function renderizarCardapio(itens){
+  [0,1,2,3].forEach(i => { document.getElementById(`items-${i}`).innerHTML = ""; });
+  itens.filter(item => item.ativo !== false).forEach(item => {
+    const catIdx = CATS_ORDER.indexOf(item.cat);
+    if(catIdx < 0) return;
+    const el = document.getElementById(`items-${catIdx}`);
+    const id = item.nome.replace(/\s+/g,"-").toLowerCase().replace(/[^a-z0-9-]/g,"");
+    el.innerHTML += `
+    <div class="item">
+      <div class="item-info">
+        <div class="item-nome">${item.nome}</div>
+        ${item.desc ? `<div class="item-desc">${item.desc}</div>` : ""}
+        <div class="item-preco">R$ ${item.preco}</div>
+      </div>
+      <div class="qtd-ctrl">
+        <div class="qtd-btn" onclick="decrementar('${item.nome}',${item.preco})">−</div>
+        <div class="qtd-num" id="qtd-${id}">0</div>
+        <div class="qtd-btn" onclick="incrementar('${item.nome}',${item.preco})">+</div>
+      </div>
+    </div>`;
+  });
+}
+// Cardápio carregado via onSnapshot abaixo;
 
 window.mudarAba = (i) => {
   document.querySelectorAll(".aba").forEach((a,idx) => a.classList.toggle("ativa", idx===i));
