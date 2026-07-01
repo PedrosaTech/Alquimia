@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Caixa · Café Alquimia</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=Jost:wght@300;400&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --perg:#E8DFC8;--perg-lt:#F2EAD8;--perg-dk:#D6C9AD;
+  --gold:#9A7A2E;--gold-lt:#C49A3C;--espresso:#2A1A08;
+  --mocha:#5A3A18;--olive:#4A5230;--border:#C8B88A;
+  --verde:#2D6A2D;--vermelho:#8B2020;
+}
+body{background:var(--perg-lt);font-family:'Jost',sans-serif;font-weight:300;color:var(--espresso);min-height:100vh}
+
+/* LOGIN */
+.login-wrap{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:2rem}
+.login-card{background:var(--perg);border:.5px solid var(--border);padding:2.5rem 2rem;width:100%;max-width:360px;text-align:center}
+.login-brand{font-family:'Cormorant Garamond',serif;font-size:26px;font-style:italic;color:var(--espresso);margin-bottom:.25rem}
+.login-brand em{color:var(--gold)}
+.login-sub{font-size:11px;letter-spacing:.22em;text-transform:uppercase;color:var(--mocha);margin-bottom:1.75rem}
+.login-field{display:flex;flex-direction:column;gap:6px;margin-bottom:1rem;text-align:left}
+.login-field label{font-size:10px;letter-spacing:.22em;text-transform:uppercase;color:var(--mocha)}
+.login-field input{width:100%;height:44px;padding:0 14px;background:var(--perg-lt);border:.5px solid var(--border);font-family:'Jost',sans-serif;font-size:16px;color:var(--espresso);outline:none;border-radius:0}
+.login-field input:focus{border-color:var(--gold)}
+.btn-login{width:100%;padding:13px;background:var(--espresso);color:var(--perg-lt);border:none;font-family:'Jost',sans-serif;font-size:12px;letter-spacing:.3em;text-transform:uppercase;cursor:pointer;margin-top:.5rem}
+.login-erro{display:none;font-size:12px;color:var(--vermelho);margin-top:.75rem}
+
+/* PAINEL */
+.painel{display:none}
+.hdr{background:var(--espresso);padding:1rem 1.25rem;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--gold);flex-wrap:wrap;gap:8px}
+.hdr-brand{font-family:'Cormorant Garamond',serif;font-size:18px;font-style:italic;color:var(--perg-lt)}
+.hdr-brand span{font-style:normal;font-size:10px;color:var(--gold);letter-spacing:.2em;text-transform:uppercase;margin-left:8px}
+.hdr-acoes{display:flex;gap:8px}
+.btn-sm{padding:6px 14px;font-family:'Jost',sans-serif;font-size:10px;letter-spacing:.18em;text-transform:uppercase;cursor:pointer;border:.5px solid var(--gold);background:transparent;color:var(--gold)}
+.btn-sm:hover{background:var(--gold);color:var(--perg-lt)}
+.btn-sm.danger{border-color:var(--vermelho);color:var(--vermelho)}
+
+.body{max-width:700px;margin:0 auto;padding:1.5rem 1rem 3rem}
+
+/* stats */
+.stats{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:1.5rem}
+.stat{background:var(--perg);border:.5px solid var(--border);padding:1rem .75rem;text-align:center}
+.stat-val{font-family:'Cormorant Garamond',serif;font-size:30px;font-weight:300;color:var(--espresso);line-height:1}
+.stat-val.gold{color:var(--gold)}
+.stat-val.verde{color:var(--verde)}
+.stat-lbl{font-size:9px;letter-spacing:.2em;text-transform:uppercase;color:var(--mocha);margin-top:4px}
+
+/* tabs */
+.tabs{display:flex;background:var(--perg);border:.5px solid var(--border);margin-bottom:1.25rem}
+.tab{flex:1;padding:10px;text-align:center;font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--mocha);cursor:pointer;border-bottom:2px solid transparent}
+.tab.ativa{color:var(--gold);border-bottom-color:var(--gold)}
+
+/* comandas */
+.comanda{background:var(--perg);border:.5px solid var(--border);margin-bottom:10px;overflow:hidden}
+.comanda-hdr{display:flex;align-items:center;justify-content:space-between;padding:12px 14px;cursor:pointer;gap:10px}
+.comanda-nome{font-family:'Cormorant Garamond',serif;font-size:19px;color:var(--espresso)}
+.comanda-total{font-family:'Cormorant Garamond',serif;font-size:19px;color:var(--gold);white-space:nowrap}
+.comanda-status{font-size:9px;letter-spacing:.18em;text-transform:uppercase;color:var(--mocha)}
+.comanda-body{display:none;border-top:.5px solid var(--border);padding:12px 14px}
+.comanda-body.aberta{display:block}
+.item-linha{display:flex;justify-content:space-between;padding:5px 0;border-bottom:.5px solid var(--perg-dk);font-size:13px}
+.item-linha:last-of-type{border-bottom:none}
+.item-linha-nome{color:var(--espresso)}
+.item-linha-qtd{color:var(--mocha);margin-left:4px}
+.item-linha-preco{color:var(--gold);font-family:'Cormorant Garamond',serif;font-size:15px}
+.comanda-footer{display:flex;justify-content:space-between;align-items:center;margin-top:12px;padding-top:10px;border-top:.5px solid var(--border)}
+.comanda-total-label{font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--mocha)}
+.comanda-total-val{font-family:'Cormorant Garamond',serif;font-size:22px;color:var(--espresso)}
+.comanda-acoes{display:flex;gap:8px;margin-top:10px}
+.btn-fechar{flex:1;padding:10px;background:var(--espresso);color:var(--perg-lt);border:none;font-family:'Jost',sans-serif;font-size:11px;letter-spacing:.2em;text-transform:uppercase;cursor:pointer}
+.btn-fechar:hover{background:var(--mocha)}
+
+/* pgto */
+.pgto-sel{display:grid;grid-template-columns:repeat(2,1fr);gap:6px;margin-top:8px}
+.pgto-opt{padding:8px;border:.5px solid var(--border);text-align:center;cursor:pointer;font-size:12px;color:var(--mocha);letter-spacing:.1em;text-transform:uppercase}
+.pgto-opt.sel{background:var(--espresso);color:var(--perg-lt);border-color:var(--espresso)}
+
+.empty{text-align:center;padding:2.5rem;font-family:'Cormorant Garamond',serif;font-style:italic;color:var(--mocha);font-size:16px}
+
+/* resumo */
+.resumo-item{display:flex;justify-content:space-between;padding:8px 0;border-bottom:.5px solid var(--perg-dk);font-size:14px}
+.resumo-item:last-child{border-bottom:none}
+.resumo-total{display:flex;justify-content:space-between;padding:12px 0 0;margin-top:4px;border-top:1px solid var(--border)}
+.resumo-total span:first-child{font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--mocha)}
+.resumo-total span:last-child{font-family:'Cormorant Garamond',serif;font-size:24px;color:var(--gold)}
+
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--verde);color:#fff;padding:10px 24px;font-size:13px;opacity:0;transition:all .3s;pointer-events:none;white-space:nowrap;z-index:999}
+.toast.show{transform:translateX(-50%) translateY(0);opacity:1}
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div class="login-wrap" id="tela-login">
+  <div class="login-card">
+    <div class="login-brand">Café <em>Alquimia</em></div>
+    <div class="login-sub">Caixa · Barista</div>
+    <div class="login-field">
+      <label>Senha</label>
+      <input type="password" id="senha" placeholder="••••••" onkeydown="if(event.key==='Enter')entrar()">
+    </div>
+    <button class="btn-login" onclick="entrar()">Entrar</button>
+    <div class="login-erro" id="login-erro">Senha incorreta.</div>
+  </div>
+</div>
+
+<!-- PAINEL -->
+<div class="painel" id="tela-painel">
+  <div class="hdr">
+    <div class="hdr-brand">Al-qui-mia <span>caixa</span></div>
+    <div class="hdr-acoes">
+      <button class="btn-sm" onclick="exportarCSV()">↓ CSV</button>
+      <button class="btn-sm" onclick="sair()">Sair</button>
+    </div>
+  </div>
+
+  <div class="body">
+    <div class="stats">
+      <div class="stat"><div class="stat-val verde" id="s-abertas">—</div><div class="stat-lbl">Comandas abertas</div></div>
+      <div class="stat"><div class="stat-val gold" id="s-faturado">—</div><div class="stat-lbl">Faturado hoje</div></div>
+    </div>
+
+    <div class="tabs">
+      <div class="tab ativa" onclick="mudarTab(0)">Abertas</div>
+      <div class="tab" onclick="mudarTab(1)">Fechadas</div>
+      <div class="tab" onclick="mudarTab(2)">Resumo</div>
+    </div>
+
+    <div id="tab-abertas"></div>
+    <div id="tab-fechadas" style="display:none"></div>
+    <div id="tab-resumo" style="display:none"></div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-app.js";
+import { getFirestore, collection, onSnapshot, doc, updateDoc, query, orderBy }
+  from "https://www.gstatic.com/firebasejs/11.0.0/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey:"AIzaSyBe76lIVYlw2FrFytDA74HacROTGhyQs6k",
+  authDomain:"alquimia-7dfd3.firebaseapp.com",
+  projectId:"alquimia-7dfd3",
+  storageBucket:"alquimia-7dfd3.firebasestorage.app",
+  messagingSenderId:"638103115384",
+  appId:"1:638103115384:web:083c881afc8df705ba3f8d"
+};
+const SENHA = "0866";
+const app = initializeApp(firebaseConfig);
+const db  = getFirestore(app);
+
+let todasComandas = [];
+let tabAtiva = 0;
+let pgtoSel = {};
+
+window.entrar = () => {
+  if(document.getElementById("senha").value === SENHA){
+    document.getElementById("tela-login").style.display = "none";
+    document.getElementById("tela-painel").style.display = "block";
+    iniciar();
+  } else {
+    document.getElementById("login-erro").style.display = "block";
+  }
+};
+window.sair = () => {
+  document.getElementById("tela-login").style.display = "flex";
+  document.getElementById("tela-painel").style.display = "none";
+};
+
+function iniciar(){
+  const q = query(collection(db,"comandas"), orderBy("aberta_em","desc"));
+  onSnapshot(q, snap => {
+    todasComandas = snap.docs.map(d => ({id:d.id,...d.data()}));
+    renderizarTudo();
+  });
+}
+
+function renderizarTudo(){
+  const abertas  = todasComandas.filter(c => c.status==="aberta");
+  const fechadas = todasComandas.filter(c => c.status==="fechada");
+  const faturado = fechadas.reduce((s,c)=>s+(c.total||0),0);
+
+  document.getElementById("s-abertas").textContent  = abertas.length;
+  document.getElementById("s-faturado").textContent = `R$${faturado}`;
+
+  renderizarAbertas(abertas);
+  renderizarFechadas(fechadas);
+  renderizarResumo(fechadas);
+}
+
+function renderizarAbertas(lista){
+  const el = document.getElementById("tab-abertas");
+  if(!lista.length){ el.innerHTML=`<div class="empty">Nenhuma comanda aberta.</div>`; return; }
+  el.innerHTML = lista.map(c => comandaHtml(c, true)).join("");
+}
+
+function renderizarFechadas(lista){
+  const el = document.getElementById("tab-fechadas");
+  if(!lista.length){ el.innerHTML=`<div class="empty">Nenhuma comanda fechada ainda.</div>`; return; }
+  el.innerHTML = lista.map(c => comandaHtml(c, false)).join("");
+}
+
+function comandaHtml(c, aberta){
+  const itens = (c.itens||[]).map(i =>
+    `<div class="item-linha">
+      <span class="item-linha-nome">${esc(i.nome)}<span class="item-linha-qtd">×${i.qtd}</span></span>
+      <span class="item-linha-preco">R$ ${i.preco*i.qtd}</span>
+    </div>`
+  ).join("") || `<div style="font-style:italic;color:var(--mocha);font-size:13px">Nenhum item ainda.</div>`;
+
+  const pgtoOpts = aberta ? `
+    <div class="pgto-sel">
+      <div class="pgto-opt ${pgtoSel[c.id]==='pix'?'sel':''}" onclick="selPgto('${c.id}','pix')">Pix</div>
+      <div class="pgto-opt ${pgtoSel[c.id]==='debito'?'sel':''}" onclick="selPgto('${c.id}','debito')">Débito</div>
+      <div class="pgto-opt ${pgtoSel[c.id]==='credito'?'sel':''}" onclick="selPgto('${c.id}','credito')">Crédito</div>
+      <div class="pgto-opt ${pgtoSel[c.id]==='dinheiro'?'sel':''}" onclick="selPgto('${c.id}','dinheiro')">Dinheiro</div>
+    </div>
+    <div class="comanda-acoes">
+      <button class="btn-fechar" onclick="fecharComanda('${c.id}')">Fechar comanda</button>
+    </div>` : `<div style="font-size:11px;letter-spacing:.15em;text-transform:uppercase;color:var(--verde);margin-top:8px">✓ Pago via ${c.pagamento||"—"}</div>`;
+
+  return `
+  <div class="comanda" id="com-${c.id}">
+    <div class="comanda-hdr" onclick="toggleComanda('${c.id}')">
+      <div>
+        <div class="comanda-nome">${esc(c.nome)}</div>
+        <div class="comanda-status">${aberta?"Aberta":"Fechada"} · ${c.qtd||1} pessoa(s)</div>
+      </div>
+      <div class="comanda-total">R$ ${c.total||0}</div>
+    </div>
+    <div class="comanda-body ${aberta?'aberta':''}" id="body-${c.id}">
+      ${itens}
+      <div class="comanda-footer">
+        <span class="comanda-total-label">Total</span>
+        <span class="comanda-total-val">R$ ${c.total||0}</span>
+      </div>
+      ${pgtoOpts}
+    </div>
+  </div>`;
+}
+
+window.toggleComanda = (id) => {
+  const el = document.getElementById(`body-${id}`);
+  el.classList.toggle("aberta");
+};
+
+window.selPgto = (id, tipo) => {
+  pgtoSel[id] = tipo;
+  renderizarTudo();
+};
+
+window.fecharComanda = async (id) => {
+  const pgto = pgtoSel[id];
+  if(!pgto){ alert("Selecione a forma de pagamento."); return; }
+  await updateDoc(doc(db,"comandas",id),{
+    status:"fechada",
+    pagamento: pgto,
+    fechada_em: new Date().toISOString()
+  });
+  mostrarToast("✓ Comanda fechada");
+};
+
+function renderizarResumo(fechadas){
+  const el = document.getElementById("tab-resumo");
+  if(!fechadas.length){ el.innerHTML=`<div class="empty">Nenhuma venda fechada ainda.</div>`; return; }
+
+  // agrupa itens
+  const itensMap = {};
+  fechadas.forEach(c => (c.itens||[]).forEach(i => {
+    if(!itensMap[i.nome]) itensMap[i.nome] = {qtd:0,total:0};
+    itensMap[i.nome].qtd   += i.qtd;
+    itensMap[i.nome].total += i.preco*i.qtd;
+  }));
+
+  const total = fechadas.reduce((s,c)=>s+(c.total||0),0);
+
+  const itensHtml = Object.entries(itensMap)
+    .sort((a,b)=>b[1].total-a[1].total)
+    .map(([nome,v])=>`
+      <div class="resumo-item">
+        <span>${esc(nome)} <span style="color:var(--mocha);font-size:12px">×${v.qtd}</span></span>
+        <span style="font-family:'Cormorant Garamond',serif;font-size:17px;color:var(--gold)">R$ ${v.total}</span>
+      </div>`).join("");
+
+  el.innerHTML = `
+    <div style="background:var(--perg);border:.5px solid var(--border);padding:1.25rem">
+      <div style="font-size:10px;letter-spacing:.28em;text-transform:uppercase;color:var(--gold);margin-bottom:1rem">Itens vendidos</div>
+      ${itensHtml}
+      <div class="resumo-total">
+        <span>Total do dia</span>
+        <span>R$ ${total}</span>
+      </div>
+    </div>`;
+}
+
+window.mudarTab = (i) => {
+  tabAtiva = i;
+  document.querySelectorAll(".tab").forEach((t,idx) => t.classList.toggle("ativa",idx===i));
+  ["tab-abertas","tab-fechadas","tab-resumo"].forEach((id,idx) => {
+    document.getElementById(id).style.display = idx===i ? "block" : "none";
+  });
+};
+
+window.exportarCSV = () => {
+  const fechadas = todasComandas.filter(c=>c.status==="fechada");
+  const linhas = [
+    ["Nome","Pessoas","Itens","Total","Pagamento","Fechada em"],
+    ...fechadas.map(c=>[
+      c.nome, c.qtd||1,
+      (c.itens||[]).map(i=>`${i.nome}×${i.qtd}`).join("; "),
+      c.total||0, c.pagamento||"",
+      c.fechada_em ? new Date(c.fechada_em).toLocaleString("pt-BR") : ""
+    ])
+  ];
+  const csv  = linhas.map(l=>l.map(v=>`"${String(v).replace(/"/g,'""')}"`).join(",")).join("\n");
+  const blob = new Blob(["\uFEFF"+csv],{type:"text/csv;charset=utf-8;"});
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement("a");
+  a.href=url; a.download=`alquimia-vendas-${new Date().toISOString().slice(0,10)}.csv`;
+  a.click(); URL.revokeObjectURL(url);
+};
+
+function mostrarToast(msg){
+  const t = document.getElementById("toast");
+  t.textContent=msg; t.classList.add("show");
+  setTimeout(()=>t.classList.remove("show"),3000);
+}
+function esc(s){ return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
+</script>
+</body>
+</html>

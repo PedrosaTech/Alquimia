@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Check-in · Café Alquimia</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=Jost:wght@300;400&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --perg:#E8DFC8;--perg-lt:#F2EAD8;--perg-dk:#D6C9AD;
+  --gold:#9A7A2E;--gold-lt:#C49A3C;--espresso:#2A1A08;
+  --mocha:#5A3A18;--olive:#4A5230;--border:#C8B88A;
+  --verde:#2D6A2D;--vermelho:#8B2020;
+}
+body{background:var(--perg-lt);font-family:'Jost',sans-serif;font-weight:300;color:var(--espresso);min-height:100vh}
+
+/* LOGIN */
+.login-wrap{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:2rem}
+.login-card{background:var(--perg);border:.5px solid var(--border);padding:2.5rem 2rem;width:100%;max-width:360px;text-align:center}
+.login-brand{font-family:'Cormorant Garamond',serif;font-size:26px;font-style:italic;color:var(--espresso);margin-bottom:.25rem}
+.login-brand em{color:var(--gold)}
+.login-sub{font-size:11px;letter-spacing:.22em;text-transform:uppercase;color:var(--mocha);margin-bottom:1.75rem}
+.login-field{display:flex;flex-direction:column;gap:6px;margin-bottom:1rem;text-align:left}
+.login-field label{font-size:10px;letter-spacing:.22em;text-transform:uppercase;color:var(--mocha)}
+.login-field input{width:100%;height:44px;padding:0 14px;background:var(--perg-lt);border:.5px solid var(--border);font-family:'Jost',sans-serif;font-size:16px;font-weight:300;color:var(--espresso);outline:none;border-radius:0}
+.login-field input:focus{border-color:var(--gold)}
+.btn-login{width:100%;padding:13px;background:var(--espresso);color:var(--perg-lt);border:none;font-family:'Jost',sans-serif;font-size:12px;letter-spacing:.3em;text-transform:uppercase;cursor:pointer;margin-top:.5rem}
+.login-erro{display:none;font-size:12px;color:var(--vermelho);margin-top:.75rem}
+
+/* PAINEL */
+.painel{display:none}
+.hdr{background:var(--espresso);padding:1rem 1.25rem;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--gold)}
+.hdr-brand{font-family:'Cormorant Garamond',serif;font-size:18px;font-style:italic;color:var(--perg-lt)}
+.hdr-brand span{font-style:normal;font-size:10px;color:var(--gold);letter-spacing:.2em;text-transform:uppercase;margin-left:8px}
+.btn-sair{background:transparent;border:.5px solid var(--gold);color:var(--gold);padding:5px 14px;font-family:'Jost',sans-serif;font-size:10px;letter-spacing:.2em;text-transform:uppercase;cursor:pointer}
+
+.body{max-width:600px;margin:0 auto;padding:1.5rem 1rem 3rem}
+
+/* stats */
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:1.5rem}
+.stat{background:var(--perg);border:.5px solid var(--border);padding:1rem .75rem;text-align:center}
+.stat-val{font-family:'Cormorant Garamond',serif;font-size:32px;font-weight:300;color:var(--espresso);line-height:1}
+.stat-val.gold{color:var(--gold)}
+.stat-val.verde{color:var(--verde)}
+.stat-lbl{font-size:9px;letter-spacing:.2em;text-transform:uppercase;color:var(--mocha);margin-top:4px}
+
+/* busca */
+.busca-wrap{margin-bottom:1.25rem}
+.busca-wrap input{width:100%;height:44px;padding:0 14px;background:var(--perg);border:.5px solid var(--border);font-family:'Jost',sans-serif;font-size:16px;font-weight:300;color:var(--espresso);outline:none;border-radius:0}
+.busca-wrap input:focus{border-color:var(--gold)}
+
+/* lista */
+.sec-lbl{font-size:10px;letter-spacing:.28em;text-transform:uppercase;color:var(--gold);display:flex;align-items:center;gap:10px;margin-bottom:1rem}
+.sec-lbl::after{content:'';flex:1;height:.5px;background:var(--border)}
+
+.convidado{display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-bottom:.5px solid var(--perg-dk);gap:12px}
+.convidado:last-child{border-bottom:none}
+.conv-info{flex:1}
+.conv-nome{font-family:'Cormorant Garamond',serif;font-size:18px;color:var(--espresso);margin-bottom:2px}
+.conv-wpp{font-size:12px;color:var(--mocha)}
+.conv-qtd{font-size:11px;color:var(--gold);letter-spacing:.05em}
+.conv-hora{font-size:11px;color:var(--verde);font-style:italic;margin-top:2px}
+.btn-checkin{padding:9px 18px;background:var(--espresso);color:var(--perg-lt);border:none;font-family:'Jost',sans-serif;font-size:11px;letter-spacing:.15em;text-transform:uppercase;cursor:pointer;white-space:nowrap;transition:background .2s}
+.btn-checkin:hover{background:var(--mocha)}
+.btn-checkin.feito{background:var(--verde);cursor:default}
+.btn-checkin.feito:hover{background:var(--verde)}
+
+.novo-wrap{background:var(--perg);border:.5px solid var(--border);padding:1.25rem;margin-bottom:1.5rem}
+.novo-titulo{font-size:10px;letter-spacing:.25em;text-transform:uppercase;color:var(--gold);margin-bottom:1rem}
+.novo-fields{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px}
+.novo-field{display:flex;flex-direction:column;gap:5px}
+.novo-field label{font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--mocha)}
+.novo-field input,.novo-field select{height:42px;padding:0 12px;background:var(--perg-lt);border:.5px solid var(--border);font-family:'Jost',sans-serif;font-size:15px;color:var(--espresso);outline:none;border-radius:0;appearance:none;-webkit-appearance:none}
+.novo-field input:focus,.novo-field select:focus{border-color:var(--gold)}
+.btn-add{width:100%;padding:11px;background:var(--gold);color:var(--perg-lt);border:none;font-family:'Jost',sans-serif;font-size:11px;letter-spacing:.25em;text-transform:uppercase;cursor:pointer}
+
+.empty{text-align:center;padding:2rem;font-family:'Cormorant Garamond',serif;font-style:italic;color:var(--mocha);font-size:16px}
+
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--espresso);color:var(--perg-lt);padding:10px 24px;font-size:13px;font-style:italic;opacity:0;transition:all .3s;pointer-events:none;white-space:nowrap;z-index:999}
+.toast.show{transform:translateX(-50%) translateY(0);opacity:1}
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div class="login-wrap" id="tela-login">
+  <div class="login-card">
+    <div class="login-brand">Café <em>Alquimia</em></div>
+    <div class="login-sub">Check-in · Barista</div>
+    <div class="login-field">
+      <label>Senha</label>
+      <input type="password" id="senha" placeholder="••••••" onkeydown="if(event.key==='Enter')entrar()">
+    </div>
+    <button class="btn-login" onclick="entrar()">Entrar</button>
+    <div class="login-erro" id="login-erro">Senha incorreta.</div>
+  </div>
+</div>
+
+<!-- PAINEL -->
+<div class="painel" id="tela-painel">
+  <div class="hdr">
+    <div class="hdr-brand">Al-qui-mia <span>check-in</span></div>
+    <button class="btn-sair" onclick="sair()">Sair</button>
+  </div>
+
+  <div class="body">
+    <div class="stats">
+      <div class="stat"><div class="stat-val" id="s-total">—</div><div class="stat-lbl">Confirmados</div></div>
+      <div class="stat"><div class="stat-val verde" id="s-presentes">—</div><div class="stat-lbl">Presentes</div></div>
+      <div class="stat"><div class="stat-val gold" id="s-faltam">—</div><div class="stat-lbl">Aguardando</div></div>
+    </div>
+
+    <!-- Chegada avulsa -->
+    <div class="novo-wrap">
+      <div class="novo-titulo">Chegada não confirmada</div>
+      <div class="novo-fields">
+        <div class="novo-field" style="grid-column:1/-1">
+          <label>Nome</label>
+          <input type="text" id="novo-nome" placeholder="Nome do visitante">
+        </div>
+        <div class="novo-field">
+          <label>WhatsApp</label>
+          <input type="tel" id="novo-wpp" placeholder="(71) 9 0000-0000">
+        </div>
+        <div class="novo-field">
+          <label>Pessoas</label>
+          <select id="novo-qtd">
+            <option value="1">1 pessoa</option>
+            <option value="2">2 pessoas</option>
+            <option value="3">3 pessoas</option>
+            <option value="4">4 pessoas</option>
+          </select>
+        </div>
+      </div>
+      <button class="btn-add" onclick="adicionarAvulso()">+ Registrar chegada</button>
+    </div>
+
+    <div class="busca-wrap">
+      <input type="text" id="busca" placeholder="Buscar convidado…" oninput="filtrar()">
+    </div>
+
+    <div class="sec-lbl">Lista de convidados</div>
+    <div id="lista"></div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-app.js";
+import { getFirestore, collection, onSnapshot, doc, updateDoc, addDoc, query, orderBy }
+  from "https://www.gstatic.com/firebasejs/11.0.0/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey:"AIzaSyBe76lIVYlw2FrFytDA74HacROTGhyQs6k",
+  authDomain:"alquimia-7dfd3.firebaseapp.com",
+  projectId:"alquimia-7dfd3",
+  storageBucket:"alquimia-7dfd3.firebasestorage.app",
+  messagingSenderId:"638103115384",
+  appId:"1:638103115384:web:083c881afc8df705ba3f8d"
+};
+const SENHA = "0866";
+const app = initializeApp(firebaseConfig);
+const db  = getFirestore(app);
+const col = collection(db, "confirmacoes");
+
+let todos = [];
+
+window.entrar = () => {
+  if(document.getElementById("senha").value === SENHA){
+    document.getElementById("tela-login").style.display = "none";
+    document.getElementById("tela-painel").style.display = "block";
+    iniciar();
+  } else {
+    document.getElementById("login-erro").style.display = "block";
+  }
+};
+window.sair = () => {
+  document.getElementById("tela-login").style.display = "flex";
+  document.getElementById("tela-painel").style.display = "none";
+};
+
+function iniciar(){
+  const q = query(col, orderBy("criadoEm","asc"));
+  onSnapshot(q, snap => {
+    todos = snap.docs.map(d => ({id:d.id, ...d.data()}));
+    renderizar(todos);
+    atualizarStats(todos);
+  });
+}
+
+function atualizarStats(rows){
+  const presentes = rows.filter(r => r.checkin).length;
+  document.getElementById("s-total").textContent = rows.length;
+  document.getElementById("s-presentes").textContent = presentes;
+  document.getElementById("s-faltam").textContent = rows.length - presentes;
+}
+
+function renderizar(rows){
+  const el = document.getElementById("lista");
+  if(!rows.length){ el.innerHTML = `<div class="empty">Nenhum convidado encontrado.</div>`; return; }
+  el.innerHTML = rows.map(r => {
+    const hora = r.checkin_em ? new Date(r.checkin_em).toLocaleTimeString("pt-BR",{hour:"2-digit",minute:"2-digit"}) : "";
+    const feito = r.checkin;
+    return `<div class="convidado">
+      <div class="conv-info">
+        <div class="conv-nome">${esc(r.nome)}</div>
+        <div class="conv-wpp">${esc(r.wpp||"")} ${r.qtd>1?`<span class="conv-qtd">· ${r.qtd} pessoas</span>`:""}</div>
+        ${feito ? `<div class="conv-hora">✓ Check-in às ${hora}</div>` : ""}
+      </div>
+      <button class="btn-checkin ${feito?"feito":""}" onclick="fazerCheckin('${r.id}')" ${feito?"disabled":""}>
+        ${feito ? "Presente" : "Check-in"}
+      </button>
+    </div>`;
+  }).join("");
+}
+
+window.fazerCheckin = async (id) => {
+  await updateDoc(doc(db,"confirmacoes",id),{
+    checkin: true,
+    checkin_em: new Date().toISOString()
+  });
+  // abre comanda automaticamente
+  const pessoa = todos.find(t => t.id === id);
+  await addDoc(collection(db,"comandas"),{
+    confirmacao_id: id,
+    nome: pessoa.nome,
+    wpp: pessoa.wpp || "",
+    qtd: pessoa.qtd || 1,
+    status: "aberta",
+    itens: [],
+    total: 0,
+    aberta_em: new Date().toISOString()
+  });
+  mostrarToast(`✓ ${pessoa.nome} — comanda aberta`);
+};
+
+window.adicionarAvulso = async () => {
+  const nome = document.getElementById("novo-nome").value.trim();
+  const wpp  = document.getElementById("novo-wpp").value.trim();
+  const qtd  = parseInt(document.getElementById("novo-qtd").value);
+  if(!nome){ alert("Informe o nome."); return; }
+  const ref = await addDoc(col,{
+    nome, wpp, qtd,
+    origem: "Chegada avulsa",
+    checkin: true,
+    checkin_em: new Date().toISOString(),
+    criadoEm: new Date().toISOString()
+  });
+  await addDoc(collection(db,"comandas"),{
+    confirmacao_id: ref.id,
+    nome, wpp, qtd,
+    status: "aberta",
+    itens: [],
+    total: 0,
+    aberta_em: new Date().toISOString()
+  });
+  document.getElementById("novo-nome").value = "";
+  document.getElementById("novo-wpp").value = "";
+  mostrarToast(`✓ ${nome} — chegada registrada e comanda aberta`);
+};
+
+window.filtrar = () => {
+  const q = document.getElementById("busca").value.toLowerCase();
+  renderizar(todos.filter(r =>
+    (r.nome||"").toLowerCase().includes(q) ||
+    (r.wpp||"").toLowerCase().includes(q)
+  ));
+};
+
+function mostrarToast(msg){
+  const t = document.getElementById("toast");
+  t.textContent = msg;
+  t.classList.add("show");
+  setTimeout(() => t.classList.remove("show"), 3000);
+}
+function esc(s){ return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
+</script>
+</body>
+</html>
