@@ -552,7 +552,11 @@ function comandaHtml(c, aberta){
       <div style="flex:1">
         <div class="item-cx-nome ${ok?"pronto":""}">${esc(it.nome)}<span class="item-cx-qtd"> ×${it.qtd}</span></div>
       </div>
-      <div class="item-cx-preco ${ok?"pronto":""}">R$ ${it.preco*it.qtd}</div>
+      <div style="display:flex;align-items:center;gap:6px">
+        <div class="item-cx-preco ${ok?"pronto":""}">R$ ${it.preco*it.qtd}</div>
+        ${aberta?`<button onclick="window.removerItemCx('${c.id}',${idx})"
+          style="width:32px;height:32px;border:none;background:transparent;color:var(--vermelho);font-size:22px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;padding:0">×</button>`:""}
+      </div>
     </div>`;
   }).join("") || `<div style="padding:12px 14px;font-style:italic;color:var(--mocha);font-size:14px">Nenhum item.</div>`;
 
@@ -643,6 +647,16 @@ window.toggleComanda = (id) => {
 window.selPgto = (cid, tipo) => {
   pgtoSel[cid] = tipo;
   renderCx();
+};
+
+window.removerItemCx = async (cid, idx) => {
+  const c = comandas.find(x=>x.id===cid); if(!c) return;
+  const item = (c.itens||[])[idx]; if(!item) return;
+  if(!confirm(`Remover "${item.nome}" da comanda?`)) return;
+  const novosItens = (c.itens||[]).filter((_,i)=>i!==idx);
+  const novoTotal  = Math.max(0,(c.total||0)-(item.preco*item.qtd));
+  await updateDoc(doc(db,"comandas",cid),{itens:novosItens,total:novoTotal});
+  toast(`✓ "${item.nome}" removido`);
 };
 
 window.toggleItemCx = async (cid, idx) => {
