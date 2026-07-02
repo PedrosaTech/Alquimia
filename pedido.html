@@ -182,17 +182,21 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db  = getFirestore(app);
 
-// Stream cardápio — atualiza em tempo real
+let nomeCliente = "";
+let comandaId   = "";
+let LIMITE      = 30;
+let carrinho    = {};
+
+ — atualiza em tempo real
 onSnapshot(query(collection(db,"cardapio"), orderBy("cat","asc")), snap => {
   const itens = snap.docs.map(d => ({id:d.id,...d.data()}));
   renderizarCardapio(itens);
 });
 
-// Config — limite de vagas dinâmico
-let LIMITE = 30;
-getDoc(doc(db,"config","evento")).then(snap => {
+// Config — limite dinâmico em tempo real
+onSnapshot(doc(db,"config","evento"), snap => {
   if(snap.exists() && snap.data().limite) LIMITE = snap.data().limite;
-}).catch(()=>{});
+});
 
 // Cardápio dinâmico — carregado do Firestore
 const CATS_ORDER = ["quentes","frias","comes","doces"];
