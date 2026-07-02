@@ -400,7 +400,7 @@ body{
             <label>WhatsApp</label>
             <input type="tel" id="wpp" placeholder="(71) 9 0000-0000" required>
           </div>
-          <div class="field">
+          <div class="field" id="campo-acompanhantes">
             <label>Acompanhantes</label>
             <div class="sel-wrap">
               <select id="qtd">
@@ -473,9 +473,17 @@ let totalOcupado = 0;
 
 // config em tempo real — limite de vagas dinâmico
 onSnapshot(doc(db, "config", "evento"), (snap) => {
-  if(snap.exists() && snap.data().limite){
-    LIMITE = snap.data().limite;
-    atualizarBarra(); // recalcula com novo limite
+  if(snap.exists()){
+    const d = snap.data();
+    if(d.limite) LIMITE = d.limite;
+    // campo acompanhantes
+    const campo = document.getElementById("campo-acompanhantes");
+    if(campo){
+      const ativo = d.acompanhantes_ativo !== false;
+      campo.style.display = ativo ? "" : "none";
+      if(!ativo) document.getElementById("qtd").value = "1";
+    }
+    atualizarBarra();
   }
 });
 
