@@ -222,8 +222,18 @@ tbody td{padding:10px 14px;color:var(--espresso);font-weight:300;overflow:hidden
           <label>Horário (exibição)</label>
           <input type="text" id="cfg-hora" placeholder="15h às 21h" style="width:200px">
         </div>
-        <button class="btn-acao solid" onclick="salvarEvento()" style="margin-top:6px">Salvar evento</button>
+        <button class="btn-acao solid" onclick="window.salvarEvento()" style="margin-top:6px">Salvar evento</button>
         <div class="config-desc">Texto livre — aparece na landing page.</div>
+      </div>
+
+      <div class="config-card" style="border-color:#D4AAAA">
+        <div class="config-titulo" style="color:var(--vermelho)">Limpeza de dados</div>
+        <p class="config-desc" style="margin-bottom:1rem">Remove <strong>confirmações</strong> e <strong>comandas</strong> do banco. Use antes de cada novo evento. O cardápio e as configurações <strong>não</strong> são afetados.</p>
+        <div style="display:flex;gap:10px;flex-wrap:wrap">
+          <button class="btn-acao" style="border-color:var(--vermelho);color:var(--vermelho)" onclick="window.limparColecao('confirmacoes')">Limpar confirmações</button>
+          <button class="btn-acao" style="border-color:var(--vermelho);color:var(--vermelho)" onclick="window.limparColecao('comandas')">Limpar comandas</button>
+          <button class="btn-acao solid" style="background:var(--vermelho);border-color:var(--vermelho)" onclick="window.limparTudo()">Limpar tudo</button>
+        </div>
       </div>
 
     </div>
@@ -269,7 +279,7 @@ tbody td{padding:10px 14px;color:var(--espresso);font-weight:300;overflow:hidden
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-app.js";
 import {
   getFirestore, collection, onSnapshot, doc,
-  updateDoc, addDoc, setDoc,
+  updateDoc, addDoc, setDoc, getDocs,
   query, orderBy, deleteDoc
 } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-firestore.js";
 
@@ -505,7 +515,30 @@ window.salvarEvento = async () => {
   toast("Evento atualizado");
 };
 
-// ── UTILS ────────────────────────────────────────────────
+// ── LIMPEZA ──────────────────────────────────────────────
+window.limparColecao = async (nome) => {
+  const label = nome === "confirmacoes" ? "confirmações" : "comandas";
+  if(!confirm(`Tem certeza? Isso apaga TODAS as ${label} permanentemente.\n\nEsta ação não pode ser desfeita.`)) return;
+  const snap = await getDocs(collection(db, nome));
+  if(snap.empty){ toast(`Nenhuma ${label} para apagar.`); return; }
+  const btn = document.querySelector(`[onclick="window.limparColecao('${nome}')"]`);
+  if(btn){ btn.textContent = "Apagando…"; btn.disabled = true; }
+  let count = 0;
+  for(const d of snap.docs){
+    await deleteDoc(doc(db, nome, d.id));
+    count++;
+  }
+  if(btn){ btn.textContent = `Limpar ${label}`; btn.disabled = false; }
+  toast(`✓ ${count} ${label} removidas`);
+};
+
+window.limparTudo = async () => {
+  if(!confirm("Tem certeza? Isso apaga TODAS as confirmações e comandas permanentemente.\n\nEsta ação não pode ser desfeita.")) return;
+  await window.limparColecao("confirmacoes");
+  await window.limparColecao("comandas");
+};
+
+
 function toast(msg){
   const t = document.getElementById("toast");
   t.textContent=msg; t.classList.add("show");
