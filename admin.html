@@ -226,6 +226,15 @@ tbody td{padding:10px 14px;color:var(--espresso);font-weight:300;overflow:hidden
         <div class="config-desc">Texto livre — aparece na landing page.</div>
       </div>
 
+      <div class="config-card">
+        <div class="config-titulo">Campo de acompanhantes</div>
+        <div class="config-row">
+          <label>Mostrar na landing</label>
+          <button id="btn-acomp" class="btn-acao solid" onclick="window.toggleAcompanhantes()" style="min-width:100px">—</button>
+        </div>
+        <div class="config-desc">Quando desativado, o formulário registra sempre 1 pessoa. O limite de vagas ainda é respeitado.</div>
+      </div>
+
       <div class="config-card" style="border-color:#D4AAAA">
         <div class="config-titulo" style="color:var(--vermelho)">Limpeza de dados</div>
         <p class="config-desc" style="margin-bottom:1rem">Remove <strong>confirmações</strong> e <strong>comandas</strong> do banco. Use antes de cada novo evento. O cardápio e as configurações <strong>não</strong> são afetados.</p>
@@ -279,7 +288,7 @@ tbody td{padding:10px 14px;color:var(--espresso);font-weight:300;overflow:hidden
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-app.js";
 import {
   getFirestore, collection, onSnapshot, doc,
-  updateDoc, addDoc, setDoc, getDocs,
+  updateDoc, addDoc, setDoc, getDocs, getDoc,
   query, orderBy, deleteDoc
 } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-firestore.js";
 
@@ -495,9 +504,25 @@ function carregarConfig(){
       }
       if(d.data) document.getElementById("cfg-data").value = d.data;
       if(d.hora) document.getElementById("cfg-hora").value = d.hora;
+      // estado do campo acompanhantes
+      const btn = document.getElementById("btn-acomp");
+      if(btn){
+        const ativo = d.acompanhantes_ativo !== false; // default true
+        btn.textContent = ativo ? "Ativado" : "Desativado";
+        btn.style.background = ativo ? "var(--verde)" : "var(--vermelho)";
+        btn.style.borderColor = ativo ? "var(--verde)" : "var(--vermelho)";
+      }
     }
   });
 }
+
+window.toggleAcompanhantes = async () => {
+  const snap = await getDoc(doc(db,"config","evento"));
+  const atual = snap.exists() ? snap.data().acompanhantes_ativo !== false : true;
+  const novo  = !atual;
+  await setDoc(doc(db,"config","evento"), {acompanhantes_ativo: novo}, {merge:true});
+  toast(`Campo acompanhantes ${novo ? "ativado" : "desativado"}`);
+};
 
 window.salvarVagas = async () => {
   const v = parseInt(document.getElementById("cfg-vagas").value);
