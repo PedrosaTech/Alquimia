@@ -1,0 +1,691 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#1A120A">
+<title>Café Alquimia · Operação</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;1,400&family=Jost:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+:root{
+  --bg:#1A120A;--bg2:#241810;--bg3:#2E2018;
+  --gold:#D4A843;--gold-lt:#E8C870;
+  --text:#F2EAD8;--text2:#C8B88A;
+  --border:#4A3820;--verde:#4CAF70;
+  --vermelho:#CF5555;--mocha:#C8A878;
+}
+html,body{height:100%;overflow:hidden}
+body{background:var(--bg);font-family:'Jost',sans-serif;font-weight:300;color:var(--text);display:flex;flex-direction:column}
+
+/* ── TELAS ── */
+.tela{display:none;flex-direction:column;height:100%;overflow:hidden}
+.tela.ativa{display:flex}
+
+/* ── LOGIN ── */
+.login-center{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:2rem}
+.login-brand{font-family:'Cormorant Garamond',serif;font-size:32px;font-style:italic;color:var(--text);margin-bottom:.25rem;text-align:center}
+.login-brand em{color:var(--gold)}
+.login-sub{font-size:11px;letter-spacing:.25em;text-transform:uppercase;color:var(--mocha);margin-bottom:2.5rem;text-align:center}
+.campo{display:flex;flex-direction:column;gap:8px;width:100%;max-width:320px;margin-bottom:16px}
+.campo label{font-size:11px;letter-spacing:.22em;text-transform:uppercase;color:var(--mocha)}
+.campo input{height:52px;padding:0 16px;background:var(--bg3);border:.5px solid var(--border);color:var(--text);font-family:'Jost',sans-serif;font-size:18px;outline:none;border-radius:0;width:100%}
+.campo input:focus{border-color:var(--gold)}
+.btn-full{width:100%;max-width:320px;height:52px;background:var(--gold);color:var(--bg);border:none;font-family:'Jost',sans-serif;font-size:14px;font-weight:500;letter-spacing:.25em;text-transform:uppercase;cursor:pointer}
+.login-erro{display:none;font-size:13px;color:var(--vermelho);margin-top:12px;text-align:center}
+
+/* ── SELEÇÃO DE PAPEL ── */
+.papel-header{background:var(--bg);padding:1.25rem 1rem 1rem;text-align:center;border-bottom:.5px solid var(--border)}
+.papel-title{font-family:'Cormorant Garamond',serif;font-size:22px;font-style:italic;color:var(--gold)}
+.papel-sub{font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--mocha);margin-top:4px}
+.papel-grid{flex:1;display:grid;grid-template-rows:repeat(3,1fr);gap:1px;background:var(--border);padding:1px;overflow:hidden}
+.papel-btn{background:var(--bg2);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;cursor:pointer;border:none;color:var(--text);font-family:'Jost',sans-serif;padding:1.5rem;active:background:var(--bg3);transition:background .15s}
+.papel-btn:active{background:var(--bg3)}
+.papel-icon{font-size:36px;line-height:1}
+.papel-nome{font-size:18px;font-weight:500;letter-spacing:.05em}
+.papel-desc{font-size:12px;color:var(--mocha);letter-spacing:.05em}
+
+/* ── HEADER OPERACIONAL ── */
+.op-header{background:var(--bg);padding:.875rem 1rem;display:flex;align-items:center;justify-content:space-between;border-bottom:.5px solid var(--border);flex-shrink:0}
+.op-title{font-family:'Cormorant Garamond',serif;font-size:18px;font-style:italic;color:var(--text)}
+.op-title span{font-style:normal;font-size:11px;color:var(--gold);letter-spacing:.18em;text-transform:uppercase;margin-left:8px}
+.op-actions{display:flex;gap:8px}
+.btn-sm{height:36px;padding:0 14px;font-family:'Jost',sans-serif;font-size:11px;letter-spacing:.15em;text-transform:uppercase;cursor:pointer;border:.5px solid var(--border);background:transparent;color:var(--mocha)}
+.btn-sm.gold{border-color:var(--gold);color:var(--gold)}
+.btn-sm:active{opacity:.7}
+
+/* ── SCROLL AREA ── */
+.op-scroll{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:1rem}
+
+/* ── STATS ── */
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:1rem}
+.stat{background:var(--bg3);border:.5px solid var(--border);padding:.875rem .5rem;text-align:center}
+.stat-val{font-family:'Cormorant Garamond',serif;font-size:30px;color:var(--text);line-height:1}
+.stat-val.gold{color:var(--gold)}
+.stat-val.verde{color:var(--verde)}
+.stat-lbl{font-size:10px;letter-spacing:.15em;text-transform:uppercase;color:var(--mocha);margin-top:4px}
+
+/* ── BUSCA ── */
+.busca{width:100%;height:48px;padding:0 14px;background:var(--bg3);border:.5px solid var(--border);color:var(--text);font-family:'Jost',sans-serif;font-size:16px;outline:none;margin-bottom:1rem;border-radius:0}
+.busca:focus{border-color:var(--gold)}
+
+/* ── CHECKIN LISTA ── */
+.conv{display:flex;align-items:center;gap:12px;padding:14px 0;border-bottom:.5px solid var(--border)}
+.conv:last-child{border-bottom:none}
+.conv-info{flex:1;min-width:0}
+.conv-nome{font-family:'Cormorant Garamond',serif;font-size:20px;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.conv-detalhe{font-size:13px;color:var(--mocha);margin-top:2px}
+.conv-ok{font-size:13px;color:var(--verde);font-style:italic;margin-top:2px}
+.btn-checkin{height:44px;padding:0 18px;background:var(--bg3);border:.5px solid var(--gold);color:var(--gold);font-family:'Jost',sans-serif;font-size:12px;letter-spacing:.15em;text-transform:uppercase;cursor:pointer;flex-shrink:0}
+.btn-checkin:active{opacity:.7}
+.btn-checkin.feito{background:var(--verde);border-color:var(--verde);color:#fff}
+
+/* ── NOVO AVULSO ── */
+.avulso-card{background:var(--bg3);border:.5px solid var(--border);padding:1rem;margin-bottom:1rem}
+.avulso-title{font-size:11px;letter-spacing:.22em;text-transform:uppercase;color:var(--gold);margin-bottom:.75rem}
+.avulso-grid{display:grid;grid-template-columns:1fr 80px;gap:8px;margin-bottom:8px}
+.inp{height:48px;padding:0 12px;background:var(--bg2);border:.5px solid var(--border);color:var(--text);font-family:'Jost',sans-serif;font-size:16px;outline:none;width:100%;border-radius:0}
+.inp:focus{border-color:var(--gold)}
+select.inp{appearance:none;-webkit-appearance:none}
+.btn-add{width:100%;height:44px;background:var(--gold);color:var(--bg);border:none;font-family:'Jost',sans-serif;font-size:12px;font-weight:500;letter-spacing:.2em;text-transform:uppercase;cursor:pointer}
+.btn-add:active{opacity:.8}
+
+/* ── PREPARO ── */
+.badge-pendente{display:inline-block;background:var(--gold);color:var(--bg);padding:3px 12px;font-size:12px;letter-spacing:.08em;border-radius:2px;margin-left:8px}
+.filtro-tabs{display:flex;gap:1px;background:var(--border);margin-bottom:1rem}
+.ftab{flex:1;height:42px;text-align:center;font-size:11px;letter-spacing:.15em;text-transform:uppercase;color:var(--mocha);cursor:pointer;background:var(--bg3);border:none;font-family:'Jost',sans-serif;display:flex;align-items:center;justify-content:center}
+.ftab.ativo{color:var(--gold);background:var(--bg2)}
+.card-prep{background:var(--bg3);border:.5px solid var(--border);margin-bottom:10px;overflow:hidden}
+.card-prep.urgente{border-color:var(--gold)}
+.card-prep-hdr{display:flex;align-items:center;justify-content:space-between;padding:12px 14px;border-bottom:.5px solid var(--border)}
+.card-prep-nome{font-family:'Cormorant Garamond',serif;font-size:20px;color:var(--text)}
+.card-prep-hora{font-size:12px;color:var(--mocha);margin-top:2px}
+.card-status{font-size:10px;letter-spacing:.12em;text-transform:uppercase;padding:4px 10px;border-radius:2px}
+.card-status.pend{background:rgba(212,168,67,.15);color:var(--gold);border:.5px solid var(--gold)}
+.card-status.pronto{background:rgba(76,175,112,.15);color:var(--verde);border:.5px solid var(--verde)}
+.item-prep{display:flex;align-items:center;gap:12px;padding:12px 14px;border-bottom:.5px solid var(--border)}
+.item-prep:last-child{border-bottom:none}
+.item-prep.pronto .item-prep-nome{opacity:.4;text-decoration:line-through}
+.marcar{width:48px;height:48px;border-radius:50%;border:1.5px solid var(--gold);background:transparent;color:var(--gold);font-size:22px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.marcar:active{transform:scale(.9)}
+.marcar.ok{background:var(--verde);border-color:var(--verde);color:#fff}
+.item-prep-info{flex:1}
+.item-prep-nome{font-family:'Cormorant Garamond',serif;font-size:18px;color:var(--text)}
+.item-prep-qtd{font-size:13px;color:var(--mocha)}
+.btn-tudo{width:100%;height:42px;background:transparent;border:.5px solid var(--verde);color:var(--verde);font-family:'Jost',sans-serif;font-size:11px;letter-spacing:.18em;text-transform:uppercase;cursor:pointer;margin:0 0 0}
+.btn-tudo:active{background:var(--verde);color:var(--bg)}
+
+/* ── CAIXA ── */
+.caixa-tabs{display:flex;gap:1px;background:var(--border);margin-bottom:1rem}
+.ctab{flex:1;height:42px;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--mocha);cursor:pointer;background:var(--bg3);border:none;font-family:'Jost',sans-serif;display:flex;align-items:center;justify-content:center}
+.ctab.ativo{color:var(--gold);background:var(--bg2)}
+.comanda{background:var(--bg3);border:.5px solid var(--border);margin-bottom:10px;overflow:hidden}
+.comanda-hdr{display:flex;align-items:center;justify-content:space-between;padding:12px 14px;cursor:pointer}
+.comanda-nome{font-family:'Cormorant Garamond',serif;font-size:20px;color:var(--text)}
+.comanda-status{font-size:11px;color:var(--mocha);margin-top:2px}
+.comanda-total{font-family:'Cormorant Garamond',serif;font-size:22px;color:var(--gold)}
+.comanda-body{display:none;border-top:.5px solid var(--border)}
+.comanda-body.open{display:block}
+.item-cx{display:flex;align-items:center;gap:10px;padding:10px 14px;border-bottom:.5px solid var(--border)}
+.item-cx:last-of-type{border-bottom:none}
+.item-cx-btn{width:32px;height:32px;border-radius:50%;border:1.5px solid var(--gold);background:transparent;color:var(--gold);font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.item-cx-btn.ok{background:var(--verde);border-color:var(--verde);color:#fff}
+.item-cx-btn:active{opacity:.7}
+.item-cx-nome{flex:1;font-size:15px;color:var(--text)}
+.item-cx-nome.pronto{opacity:.4;text-decoration:line-through}
+.item-cx-qtd{font-size:12px;color:var(--mocha)}
+.item-cx-preco{font-family:'Cormorant Garamond',serif;font-size:17px;color:var(--gold)}
+.item-cx-preco.pronto{opacity:.4}
+.comanda-footer{padding:12px 14px;border-top:.5px solid var(--border)}
+.comanda-total-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+.comanda-total-label{font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--mocha)}
+.comanda-total-val{font-family:'Cormorant Garamond',serif;font-size:24px;color:var(--text)}
+.pgto-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:6px;margin-bottom:10px}
+.pgto-opt{height:44px;border:.5px solid var(--border);background:transparent;color:var(--mocha);font-family:'Jost',sans-serif;font-size:13px;letter-spacing:.1em;text-transform:uppercase;cursor:pointer}
+.pgto-opt.sel{background:var(--gold);color:var(--bg);border-color:var(--gold)}
+.pgto-opt:active{opacity:.7}
+.btn-fechar{width:100%;height:48px;background:var(--gold);color:var(--bg);border:none;font-family:'Jost',sans-serif;font-size:13px;font-weight:500;letter-spacing:.2em;text-transform:uppercase;cursor:pointer;margin-bottom:8px}
+.btn-fechar:active{opacity:.8}
+.lancar-card{background:var(--bg2);padding:10px 14px;border-top:.5px solid var(--border)}
+.lancar-title{font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--gold);margin-bottom:8px}
+.lancar-row{display:grid;grid-template-columns:1fr 64px;gap:6px;margin-bottom:6px}
+.btn-lancar{width:100%;height:40px;background:transparent;border:.5px solid var(--gold);color:var(--gold);font-family:'Jost',sans-serif;font-size:11px;letter-spacing:.18em;text-transform:uppercase;cursor:pointer}
+.btn-lancar:active{background:var(--gold);color:var(--bg)}
+
+/* resumo */
+.resumo-item{display:flex;justify-content:space-between;padding:10px 0;border-bottom:.5px solid var(--border);font-size:15px}
+.resumo-total{display:flex;justify-content:space-between;padding:14px 0 0;border-top:1px solid var(--border)}
+.resumo-total-label{font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--mocha)}
+.resumo-total-val{font-family:'Cormorant Garamond',serif;font-size:26px;color:var(--gold)}
+
+/* ── BARRA DE PROGRESSO ── */
+.prog-wrap{margin-bottom:1rem}
+.prog-lbl{display:flex;justify-content:space-between;font-size:12px;color:var(--mocha);margin-bottom:6px}
+.prog-track{height:2px;background:var(--bg3)}
+.prog-fill{height:2px;background:var(--gold);transition:width .5s}
+
+/* ── VAZIO ── */
+.vazio{text-align:center;padding:3rem 1rem;font-family:'Cormorant Garamond',serif;font-style:italic;color:var(--mocha);font-size:18px}
+
+/* ── TOAST ── */
+.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%) translateY(60px);background:var(--verde);color:#fff;padding:10px 24px;font-size:14px;opacity:0;transition:all .3s;pointer-events:none;z-index:999;border-radius:2px;white-space:nowrap}
+.toast.show{transform:translateX(-50%) translateY(0);opacity:1}
+</style>
+</head>
+<body>
+
+<!-- ── TELA LOGIN ── -->
+<div class="tela ativa" id="t-login">
+  <div class="login-center">
+    <div class="login-brand">Café <em>Alquimia</em></div>
+    <div class="login-sub">Operação</div>
+    <div class="campo">
+      <label>Senha</label>
+      <input type="password" id="inp-senha" placeholder="••••••" onkeydown="if(event.key==='Enter')window.entrar()">
+    </div>
+    <button class="btn-full" onclick="window.entrar()">Entrar</button>
+    <div class="login-erro" id="login-erro">Senha incorreta.</div>
+  </div>
+</div>
+
+<!-- ── TELA PAPEL ── -->
+<div class="tela" id="t-papel">
+  <div class="papel-header">
+    <div class="papel-title">Qual é o seu papel hoje?</div>
+    <div class="papel-sub">Café Alquimia · <span id="papel-data"></span></div>
+  </div>
+  <div class="papel-grid">
+    <button class="papel-btn" onclick="window.escolherPapel('checkin')">
+      <div class="papel-icon">🎟️</div>
+      <div class="papel-nome">Recepção</div>
+      <div class="papel-desc">Check-in de convidados</div>
+    </button>
+    <button class="papel-btn" onclick="window.escolherPapel('preparo')">
+      <div class="papel-icon">☕</div>
+      <div class="papel-nome">Preparo</div>
+      <div class="papel-desc">Pedidos pendentes</div>
+    </button>
+    <button class="papel-btn" onclick="window.escolherPapel('caixa')">
+      <div class="papel-icon">🧾</div>
+      <div class="papel-nome">Caixa</div>
+      <div class="papel-desc">Comandas e fechamento</div>
+    </button>
+  </div>
+</div>
+
+<!-- ── TELA CHECKIN ── -->
+<div class="tela" id="t-checkin">
+  <div class="op-header">
+    <div class="op-title">Al-qui-mia <span>recepção</span></div>
+    <div class="op-actions">
+      <button class="btn-sm" onclick="window.voltarPapel()">← Papel</button>
+    </div>
+  </div>
+  <div class="op-scroll">
+    <div class="stats">
+      <div class="stat"><div class="stat-val" id="ci-total">—</div><div class="stat-lbl">Confirmados</div></div>
+      <div class="stat"><div class="stat-val verde" id="ci-presentes">—</div><div class="stat-lbl">Presentes</div></div>
+      <div class="stat"><div class="stat-val gold" id="ci-faltam">—</div><div class="stat-lbl">Aguardando</div></div>
+    </div>
+    <div class="avulso-card">
+      <div class="avulso-title">+ Chegada não confirmada</div>
+      <div class="avulso-grid">
+        <input class="inp" type="text" id="av-nome" placeholder="Nome">
+        <select class="inp" id="av-qtd">
+          <option value="1">1</option>
+          <option value="2">2</option>
+          <option value="3">3</option>
+          <option value="4">4</option>
+        </select>
+      </div>
+      <input class="inp" type="tel" id="av-wpp" placeholder="WhatsApp" style="margin-bottom:8px">
+      <button class="btn-add" onclick="window.adicionarAvulso()">Registrar chegada</button>
+    </div>
+    <input class="busca" type="text" placeholder="Buscar convidado…" oninput="window.filtrarCI()">
+    <div id="ci-lista"></div>
+  </div>
+</div>
+
+<!-- ── TELA PREPARO ── -->
+<div class="tela" id="t-preparo">
+  <div class="op-header">
+    <div class="op-title">
+      Al-qui-mia <span>preparo</span>
+      <span id="badge-pend" class="badge-pendente" style="display:none">0</span>
+    </div>
+    <div class="op-actions">
+      <button class="btn-sm" onclick="window.voltarPapel()">← Papel</button>
+    </div>
+  </div>
+  <div class="op-scroll">
+    <div class="filtro-tabs">
+      <button class="ftab ativo" onclick="window.filtrarPrep('pend')">Pendentes</button>
+      <button class="ftab" onclick="window.filtrarPrep('todas')">Todas</button>
+    </div>
+    <div id="prep-lista"></div>
+  </div>
+</div>
+
+<!-- ── TELA CAIXA ── -->
+<div class="tela" id="t-caixa">
+  <div class="op-header">
+    <div class="op-title">Al-qui-mia <span>caixa</span></div>
+    <div class="op-actions">
+      <button class="btn-sm gold" onclick="window.exportarCSV()">CSV</button>
+      <button class="btn-sm" onclick="window.voltarPapel()">← Papel</button>
+    </div>
+  </div>
+  <div class="op-scroll">
+    <div class="stats" style="grid-template-columns:repeat(2,1fr)">
+      <div class="stat"><div class="stat-val verde" id="cx-abertas">—</div><div class="stat-lbl">Abertas</div></div>
+      <div class="stat"><div class="stat-val gold" id="cx-faturado">—</div><div class="stat-lbl">Faturado</div></div>
+    </div>
+    <div class="caixa-tabs">
+      <button class="ctab ativo" onclick="window.mudarCxTab(0)">Abertas</button>
+      <button class="ctab" onclick="window.mudarCxTab(1)">Fechadas</button>
+      <button class="ctab" onclick="window.mudarCxTab(2)">Resumo</button>
+    </div>
+    <div id="cx-0"></div>
+    <div id="cx-1" style="display:none"></div>
+    <div id="cx-2" style="display:none"></div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-app.js";
+import {
+  getFirestore, collection, onSnapshot, doc, updateDoc,
+  addDoc, setDoc, getDocs, query, orderBy, deleteDoc, arrayRemove, arrayUnion
+} from "https://www.gstatic.com/firebasejs/11.0.0/firebase-firestore.js";
+
+const FB = {
+  apiKey:"AIzaSyBe76lIVYlw2FrFytDA74HacROTGhyQs6k",
+  authDomain:"alquimia-7dfd3.firebaseapp.com",
+  projectId:"alquimia-7dfd3",
+  storageBucket:"alquimia-7dfd3.firebasestorage.app",
+  messagingSenderId:"638103115384",
+  appId:"1:638103115384:web:083c881afc8df705ba3f8d"
+};
+const SENHA  = "0866";
+const LIMITE_DEFAULT = 30;
+
+const app = initializeApp(FB);
+const db  = getFirestore(app);
+
+// ── ESTADO ────────────────────────────────────────────
+let confirmacoes = [];
+let comandas     = [];
+let limiteAtual  = LIMITE_DEFAULT;
+let prepFiltro   = "pend";
+let cxTab        = 0;
+let pgtoSel      = {};
+let unsubs       = [];
+
+// ── UTILS ─────────────────────────────────────────────
+function esc(s){ return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
+function toast(msg, cor){
+  const t = document.getElementById("toast");
+  t.textContent = msg;
+  t.style.background = cor||"var(--verde)";
+  t.classList.add("show");
+  setTimeout(()=>t.classList.remove("show"), 2500);
+}
+function tela(id){
+  document.querySelectorAll(".tela").forEach(t=>t.classList.remove("ativa"));
+  document.getElementById(id).classList.add("ativa");
+}
+function hora(iso){
+  return iso ? new Date(iso).toLocaleTimeString("pt-BR",{hour:"2-digit",minute:"2-digit"}) : "—";
+}
+
+// ── AUTH ──────────────────────────────────────────────
+window.entrar = () => {
+  if(document.getElementById("inp-senha").value === SENHA){
+    tela("t-papel");
+    document.getElementById("papel-data").textContent =
+      new Date().toLocaleDateString("pt-BR",{day:"2-digit",month:"2-digit"});
+    iniciarStreams();
+  } else {
+    document.getElementById("login-erro").style.display = "block";
+  }
+};
+
+// ── PAPEL ─────────────────────────────────────────────
+window.escolherPapel = (papel) => {
+  tela(`t-${papel}`);
+};
+window.voltarPapel = () => tela("t-papel");
+
+// ── STREAMS ───────────────────────────────────────────
+function iniciarStreams(){
+  // confirmações
+  const u1 = onSnapshot(
+    query(collection(db,"confirmacoes"), orderBy("criadoEm","asc")),
+    snap => {
+      confirmacoes = snap.docs.map(d=>({id:d.id,...d.data()}));
+      renderCI(confirmacoes);
+      atualizarStatsCI();
+    }
+  );
+  // comandas
+  const u2 = onSnapshot(
+    query(collection(db,"comandas"), orderBy("aberta_em","desc")),
+    snap => {
+      comandas = snap.docs.map(d=>({id:d.id,...d.data()}));
+      renderPrep();
+      renderCx();
+    }
+  );
+  // config
+  const u3 = onSnapshot(doc(db,"config","evento"), snap => {
+    if(snap.exists() && snap.data().limite) limiteAtual = snap.data().limite;
+  });
+  unsubs = [u1,u2,u3];
+}
+
+// ══════════════════════════════════════════════════════
+// CHECK-IN
+// ══════════════════════════════════════════════════════
+function atualizarStatsCI(){
+  const pres = confirmacoes.filter(r=>r.checkin).length;
+  document.getElementById("ci-total").textContent    = confirmacoes.length;
+  document.getElementById("ci-presentes").textContent= pres;
+  document.getElementById("ci-faltam").textContent   = confirmacoes.length - pres;
+}
+
+function renderCI(rows){
+  const el = document.getElementById("ci-lista");
+  if(!rows.length){el.innerHTML=`<div class="vazio">Nenhum convidado.</div>`;return;}
+  el.innerHTML = rows.map(r => {
+    const feito = r.checkin;
+    return `<div class="conv">
+      <div class="conv-info">
+        <div class="conv-nome">${esc(r.nome)}</div>
+        <div class="conv-detalhe">${esc(r.wpp||"")}${r.qtd>1?` · ${r.qtd} pessoas`:""}</div>
+        ${feito?`<div class="conv-ok">✓ às ${hora(r.checkin_em)}</div>`:""}
+      </div>
+      <button class="btn-checkin ${feito?"feito":""}" ${feito?"disabled":""} onclick="window.fazerCI('${r.id}')">
+        ${feito?"Presente":"Check-in"}
+      </button>
+    </div>`;
+  }).join("");
+}
+
+window.filtrarCI = () => {
+  const q = document.getElementById("busca")?.value?.toLowerCase()||"";
+  renderCI(confirmacoes.filter(r=>
+    (r.nome||"").toLowerCase().includes(q)||(r.wpp||"").toLowerCase().includes(q)
+  ));
+};
+
+window.fazerCI = async (id) => {
+  const p = confirmacoes.find(r=>r.id===id); if(!p) return;
+  await updateDoc(doc(db,"confirmacoes",id),{checkin:true,checkin_em:new Date().toISOString()});
+  await addDoc(collection(db,"comandas"),{
+    confirmacao_id:id, nome:p.nome, wpp:p.wpp||"", qtd:p.qtd||1,
+    status:"aberta", itens:[], total:0, aberta_em:new Date().toISOString()
+  });
+  toast(`✓ ${p.nome} — comanda aberta`);
+};
+
+window.adicionarAvulso = async () => {
+  const nome = document.getElementById("av-nome").value.trim();
+  const wpp  = document.getElementById("av-wpp").value.trim();
+  const qtd  = parseInt(document.getElementById("av-qtd").value);
+  if(!nome){ toast("Informe o nome","var(--vermelho)"); return; }
+  const ref = await addDoc(collection(db,"confirmacoes"),{
+    nome, wpp, qtd, origem:"Chegada avulsa",
+    checkin:true, checkin_em:new Date().toISOString(),
+    criadoEm:new Date().toISOString()
+  });
+  await addDoc(collection(db,"comandas"),{
+    confirmacao_id:ref.id, nome, wpp, qtd,
+    status:"aberta", itens:[], total:0, aberta_em:new Date().toISOString()
+  });
+  document.getElementById("av-nome").value="";
+  document.getElementById("av-wpp").value="";
+  toast(`✓ ${nome} registrado`);
+};
+
+// ══════════════════════════════════════════════════════
+// PREPARO
+// ══════════════════════════════════════════════════════
+function renderPrep(){
+  let lista = comandas.filter(c=>c.status==="aberta");
+  let totalPend = 0;
+  lista.forEach(c=>(c.itens||[]).forEach(i=>{ if(i.status!=="pronto") totalPend++; }));
+  const badge = document.getElementById("badge-pend");
+  if(totalPend>0){ badge.textContent=totalPend; badge.style.display="inline-block"; }
+  else badge.style.display="none";
+
+  if(prepFiltro==="pend")
+    lista = lista.filter(c=>(c.itens||[]).some(i=>i.status!=="pronto"));
+
+  const el = document.getElementById("prep-lista");
+  if(!lista.length){
+    el.innerHTML=`<div class="vazio">${prepFiltro==="pend"?"✓ Tudo atendido":"Nenhuma comanda aberta."}</div>`;
+    return;
+  }
+  el.innerHTML = lista.map(c=>{
+    const itens = c.itens||[];
+    const temPend = itens.some(i=>i.status!=="pronto");
+    const itensHtml = itens.map((it,idx)=>{
+      const ok = it.status==="pronto";
+      return `<div class="item-prep ${ok?"pronto":""}">
+        <button class="marcar ${ok?"ok":""}" onclick="window.toggleItemPrep('${c.id}',${idx})">${ok?"✓":"○"}</button>
+        <div class="item-prep-info">
+          <div class="item-prep-nome">${esc(it.nome)}</div>
+          <div class="item-prep-qtd">qtd: ${it.qtd}</div>
+        </div>
+      </div>`;
+    }).join("") || `<div style="padding:12px 14px;font-style:italic;color:var(--mocha);font-size:14px">Aguardando pedidos…</div>`;
+    return `<div class="card-prep ${temPend?"urgente":""}">
+      <div class="card-prep-hdr">
+        <div>
+          <div class="card-prep-nome">${esc(c.nome)}</div>
+          <div class="card-prep-hora">Aberta às ${hora(c.aberta_em)}</div>
+        </div>
+        <span class="card-status ${temPend?"pend":"pronto"}">${temPend?"Pendente":"✓ Pronto"}</span>
+      </div>
+      ${itensHtml}
+      ${temPend?`<button class="btn-tudo" onclick="window.marcarTudoPrep('${c.id}')">Marcar tudo como pronto</button>`:""}
+    </div>`;
+  }).join("");
+}
+
+window.filtrarPrep = (f) => {
+  prepFiltro = f;
+  document.querySelectorAll(".ftab").forEach((t,i)=>t.classList.toggle("ativo",(i===0&&f==="pend")||(i===1&&f==="todas")));
+  renderPrep();
+};
+
+window.toggleItemPrep = async (cid, idx) => {
+  const c = comandas.find(x=>x.id===cid); if(!c) return;
+  const itens = c.itens||[];
+  const novosItens = itens.map((it,i)=>i===idx?{...it,status:it.status==="pronto"?"pendente":"pronto"}:it);
+  await updateDoc(doc(db,"comandas",cid),{itens:novosItens});
+};
+
+window.marcarTudoPrep = async (cid) => {
+  const c = comandas.find(x=>x.id===cid); if(!c) return;
+  const novosItens = (c.itens||[]).map(it=>({...it,status:"pronto"}));
+  await updateDoc(doc(db,"comandas",cid),{itens:novosItens});
+  toast(`✓ Tudo pronto — ${c.nome}`);
+};
+
+// ══════════════════════════════════════════════════════
+// CAIXA
+// ══════════════════════════════════════════════════════
+const CARDAPIO = [
+  {nome:"Café Coado da Chapada",preco:8},{nome:"Café Alquímico",preco:16},
+  {nome:"Chá do Quintal",preco:10},{nome:"Chá do Cravo com Canela",preco:10},
+  {nome:"Chá de Nibs de Cacau",preco:12},{nome:"Café Gelado do Mangará",preco:18},
+  {nome:"Suco de Banana com Limão",preco:14},{nome:"Água de Coco Natural",preco:10},
+  {nome:"Limonada do Quintal",preco:12},{nome:"Licor de Jenipapo",preco:16},
+  {nome:"Drinque Alquimia",preco:22},{nome:"Pão Integral do Mangará",preco:16},
+  {nome:"Pão com Ora-pro-nóbis",preco:18},{nome:"Pãozinho de Polvilho",preco:12},
+  {nome:"Tábua da Casa",preco:38},{nome:"Maionese de Ora-pro-nóbis",preco:14},
+  {nome:"Doce de Jaca",preco:12},{nome:"Doce de Banana",preco:12},
+  {nome:"Doce de Carambola",preco:12},{nome:"Geleia de Jaca",preco:10},
+  {nome:"Geleia de Uva com Maçã",preco:10},{nome:"Trio de Doces do Espaço",preco:30},
+];
+
+function renderCx(){
+  const abertas  = comandas.filter(c=>c.status==="aberta");
+  const fechadas = comandas.filter(c=>c.status==="fechada");
+  const faturado = fechadas.reduce((s,c)=>s+(c.total||0),0);
+  document.getElementById("cx-abertas").textContent  = abertas.length;
+  document.getElementById("cx-faturado").textContent = `R$${faturado}`;
+  renderCxAbertas(abertas);
+  renderCxFechadas(fechadas);
+  renderCxResumo(fechadas);
+}
+
+function comandaHtml(c, aberta){
+  const itens = (c.itens||[]).map((it,idx)=>{
+    const ok = it.status==="pronto";
+    return `<div class="item-cx">
+      <button class="item-cx-btn ${ok?"ok":""}" onclick="window.toggleItemCx('${c.id}',${idx})">${ok?"✓":"○"}</button>
+      <div style="flex:1">
+        <div class="item-cx-nome ${ok?"pronto":""}">${esc(it.nome)}<span class="item-cx-qtd"> ×${it.qtd}</span></div>
+      </div>
+      <div class="item-cx-preco ${ok?"pronto":""}">R$ ${it.preco*it.qtd}</div>
+    </div>`;
+  }).join("") || `<div style="padding:12px 14px;font-style:italic;color:var(--mocha);font-size:14px">Nenhum item.</div>`;
+
+  const pgtoHtml = aberta ? `
+    <div class="pgto-grid">
+      <button class="pgto-opt ${pgtoSel[c.id]==="pix"?"sel":""}" onclick="window.selPgto('${c.id}','pix')">Pix</button>
+      <button class="pgto-opt ${pgtoSel[c.id]==="debito"?"sel":""}" onclick="window.selPgto('${c.id}','debito')">Débito</button>
+      <button class="pgto-opt ${pgtoSel[c.id]==="credito"?"sel":""}" onclick="window.selPgto('${c.id}','credito')">Crédito</button>
+      <button class="pgto-opt ${pgtoSel[c.id]==="dinheiro"?"sel":""}" onclick="window.selPgto('${c.id}','dinheiro')">Dinheiro</button>
+    </div>
+    <button class="btn-fechar" onclick="window.fecharComanda('${c.id}')">Fechar comanda</button>
+    <div class="lancar-card">
+      <div class="lancar-title">+ Lançar item</div>
+      <div class="lancar-row">
+        <select class="inp" id="sel-${c.id}" style="font-size:14px">
+          <option value="">Escolha…</option>
+          ${CARDAPIO.map(p=>`<option value="${p.nome}|${p.preco}">${p.nome} R$${p.preco}</option>`).join("")}
+        </select>
+        <input class="inp" type="number" min="1" max="10" value="1" id="qtd-${c.id}" style="text-align:center">
+      </div>
+      <button class="btn-lancar" onclick="window.lancarItem('${c.id}')">Adicionar</button>
+    </div>` :
+    `<div style="padding:10px 14px;font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--verde)">✓ Pago via ${c.pagamento||"—"}</div>`;
+
+  return `<div class="comanda" id="com-${c.id}">
+    <div class="comanda-hdr" onclick="window.toggleComanda('${c.id}')">
+      <div>
+        <div class="comanda-nome">${esc(c.nome)}</div>
+        <div class="comanda-status">${aberta?"Aberta":"Fechada"} · ${c.qtd||1} pessoa(s)</div>
+      </div>
+      <div class="comanda-total">R$ ${c.total||0}</div>
+    </div>
+    <div class="comanda-body" id="body-${c.id}">
+      ${itens}
+      <div class="comanda-footer">
+        <div class="comanda-total-row">
+          <span class="comanda-total-label">Total</span>
+          <span class="comanda-total-val">R$ ${c.total||0}</span>
+        </div>
+        ${pgtoHtml}
+      </div>
+    </div>
+  </div>`;
+}
+
+function renderCxAbertas(lista){
+  const el = document.getElementById("cx-0");
+  el.innerHTML = lista.length ? lista.map(c=>comandaHtml(c,true)).join("") : `<div class="vazio">Nenhuma comanda aberta.</div>`;
+}
+function renderCxFechadas(lista){
+  const el = document.getElementById("cx-1");
+  el.innerHTML = lista.length ? lista.map(c=>comandaHtml(c,false)).join("") : `<div class="vazio">Nenhuma comanda fechada ainda.</div>`;
+}
+function renderCxResumo(fechadas){
+  const el = document.getElementById("cx-2");
+  if(!fechadas.length){el.innerHTML=`<div class="vazio">Nenhuma venda fechada.</div>`;return;}
+  const mapa = {};
+  fechadas.forEach(c=>(c.itens||[]).forEach(it=>{
+    if(!mapa[it.nome]) mapa[it.nome]={qtd:0,total:0};
+    mapa[it.nome].qtd+=it.qtd; mapa[it.nome].total+=it.preco*it.qtd;
+  }));
+  const total = fechadas.reduce((s,c)=>s+(c.total||0),0);
+  el.innerHTML = `<div style="background:var(--bg3);border:.5px solid var(--border);padding:1rem">
+    ${Object.entries(mapa).sort((a,b)=>b[1].total-a[1].total).map(([n,v])=>`
+      <div class="resumo-item">
+        <span>${esc(n)} <span style="color:var(--mocha);font-size:12px">×${v.qtd}</span></span>
+        <span style="font-family:'Cormorant Garamond',serif;font-size:18px;color:var(--gold)">R$ ${v.total}</span>
+      </div>`).join("")}
+    <div class="resumo-total">
+      <span class="resumo-total-label">Total do dia</span>
+      <span class="resumo-total-val">R$ ${total}</span>
+    </div>
+  </div>`;
+}
+
+window.mudarCxTab = (i) => {
+  cxTab = i;
+  document.querySelectorAll(".ctab").forEach((t,idx)=>t.classList.toggle("ativo",idx===i));
+  ["cx-0","cx-1","cx-2"].forEach((id,idx)=>{
+    document.getElementById(id).style.display = idx===i?"block":"none";
+  });
+};
+
+window.toggleComanda = (id) => {
+  document.getElementById(`body-${id}`)?.classList.toggle("open");
+};
+
+window.selPgto = (cid, tipo) => {
+  pgtoSel[cid] = tipo;
+  renderCx();
+};
+
+window.toggleItemCx = async (cid, idx) => {
+  const c = comandas.find(x=>x.id===cid); if(!c) return;
+  const novosItens = (c.itens||[]).map((it,i)=>i===idx?{...it,status:it.status==="pronto"?"pendente":"pronto"}:it);
+  await updateDoc(doc(db,"comandas",cid),{itens:novosItens});
+};
+
+window.fecharComanda = async (cid) => {
+  if(!pgtoSel[cid]){ toast("Selecione o pagamento","var(--vermelho)"); return; }
+  await updateDoc(doc(db,"comandas",cid),{
+    status:"fechada", pagamento:pgtoSel[cid], fechada_em:new Date().toISOString()
+  });
+  toast("✓ Comanda fechada");
+};
+
+window.lancarItem = async (cid) => {
+  const sel = document.getElementById(`sel-${cid}`);
+  const qtdEl = document.getElementById(`qtd-${cid}`);
+  if(!sel?.value){ toast("Escolha um item","var(--vermelho)"); return; }
+  const [nome,precoStr] = sel.value.split("|");
+  const preco = parseFloat(precoStr);
+  const qtd   = parseInt(qtdEl?.value||1);
+  const c = comandas.find(x=>x.id===cid); if(!c) return;
+  const novosItens = [...(c.itens||[]),{nome,preco,qtd,status:"pendente",hora:new Date().toISOString(),lancado_por:"atendente"}];
+  await updateDoc(doc(db,"comandas",cid),{itens:novosItens,total:(c.total||0)+(preco*qtd)});
+  toast(`✓ ${qtd}× ${nome}`);
+};
+
+window.exportarCSV = () => {
+  const fechadas = comandas.filter(c=>c.status==="fechada");
+  const linhas=[["Nome","Pessoas","Itens","Total","Pagamento","Fechada em"],
+    ...fechadas.map(c=>[c.nome,c.qtd||1,
+      (c.itens||[]).map(i=>`${i.nome}×${i.qtd}`).join("; "),
+      c.total||0,c.pagamento||"",
+      c.fechada_em?new Date(c.fechada_em).toLocaleString("pt-BR"):""
+    ])];
+  const csv=linhas.map(l=>l.map(v=>`"${String(v).replace(/"/g,'""')}"`).join(",")).join("\n");
+  const a=document.createElement("a");
+  a.href=URL.createObjectURL(new Blob(["\uFEFF"+csv],{type:"text/csv;charset=utf-8;"}));
+  a.download=`vendas-${new Date().toISOString().slice(0,10)}.csv`;
+  a.click();
+};
+</script>
+</body>
+</html>
