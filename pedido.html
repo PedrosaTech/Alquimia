@@ -200,14 +200,18 @@ onSnapshot(doc(db,"config","evento"), snap => {
 
 // Cardápio dinâmico — carregado do Firestore
 const CATS_ORDER = ["quentes","frias","comes","doces"];
+let catalogoAtual = []; // fonte de verdade dos preços
 
 function renderizarCardapio(itens){
+  catalogoAtual = itens; // atualiza catálogo em memória
   [0,1,2,3].forEach(i => { document.getElementById(`items-${i}`).innerHTML = ""; });
   itens.filter(item => item.ativo !== false).forEach(item => {
     const catIdx = CATS_ORDER.indexOf(item.cat);
     if(catIdx < 0) return;
     const el = document.getElementById(`items-${catIdx}`);
     const id = item.nome.replace(/\s+/g,"-").toLowerCase().replace(/[^a-z0-9-]/g,"");
+    // exibe qtd atual do carrinho ao re-renderizar
+    const qtdAtual = carrinho[item.nome]?.qtd || 0;
     el.innerHTML += `
     <div class="item">
       <div class="item-info">
@@ -216,9 +220,9 @@ function renderizarCardapio(itens){
         <div class="item-preco">R$ ${item.preco}</div>
       </div>
       <div class="qtd-ctrl">
-        <div class="qtd-btn" onclick="decrementar('${item.nome}',${item.preco})">−</div>
-        <div class="qtd-num" id="qtd-${id}">0</div>
-        <div class="qtd-btn" onclick="incrementar('${item.nome}',${item.preco})">+</div>
+        <div class="qtd-btn" onclick="decrementar('${item.nome}')">−</div>
+        <div class="qtd-num" id="qtd-${id}">${qtdAtual}</div>
+        <div class="qtd-btn" onclick="incrementar('${item.nome}')">+</div>
       </div>
     </div>`;
   });
@@ -230,13 +234,13 @@ window.mudarAba = (i) => {
   document.querySelectorAll(".secao").forEach((s,idx) => s.classList.toggle("ativa", idx===i));
 };
 
-window.incrementar = (nome, preco) => {
-  if(!carrinho[nome]) carrinho[nome] = {preco, qtd:0};
+window.incrementar = (nome) => {
+  if(!carrinho[nome]) carrinho[nome] = {qtd:0};
   carrinho[nome].qtd++;
   atualizarQtd(nome);
   atualizarCarrinho();
 };
-window.decrementar = (nome, preco) => {
+window.decrementar = (nome) => {
   if(!carrinho[nome] || carrinho[nome].qtd===0) return;
   carrinho[nome].qtd--;
   if(carrinho[nome].qtd===0) delete carrinho[nome];
@@ -248,9 +252,14 @@ function atualizarQtd(nome){
   const el = document.getElementById(`qtd-${id}`);
   if(el) el.textContent = carrinho[nome]?.qtd || 0;
 }
+function precoDoItem(nome){
+  const item = catalogoAtual.find(i => i.nome === nome);
+  return item ? item.preco : 0;
+}
+
 function atualizarCarrinho(){
   const itens = Object.entries(carrinho).filter(([,v])=>v.qtd>0);
-  const total = itens.reduce((s,[,v])=>s+(v.preco*v.qtd),0);
+  const total = itens.reduce((s,[nome,v])=>s+(precoDoItem(nome)*v.qtd),0);
   const qtd   = itens.reduce((s,[,v])=>s+v.qtd,0);
   const bar   = document.getElementById("carrinho-bar");
   if(qtd>0){
@@ -260,7 +269,7 @@ function atualizarCarrinho(){
   } else {
     bar.classList.remove("visivel");
   }
-}
+};
 
 window.identificar = async () => {
   const nome = document.getElementById("ident-nome").value.trim();
@@ -290,7 +299,10 @@ window.identificar = async () => {
 window.enviarPedido = async () => {
   const itens = Object.entries(carrinho)
     .filter(([,v])=>v.qtd>0)
-    .map(([nome,v])=>({ id: crypto.randomUUID(), nome, preco:v.preco, qtd:v.qtd, status:"pendente", hora:new Date().toISOString() }));
+    .map(([nome,v])=>{
+      const preco = precoDoItem(nome); // sempre do catálogo atual
+      return { id: crypto.randomUUID(), nome, preco, qtd:v.qtd, status:"pendente", hora:new Date().toISOString() };
+    });
   if(!itens.length) return;
   const total = itens.reduce((s,i)=>s+(i.preco*i.qtd),0);
 
