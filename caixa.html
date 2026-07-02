@@ -270,7 +270,11 @@ function comandaHtml(c, aberta){
         <button class="item-status-btn ${btnCls}" onclick="window.toggleItem('${c.id}',${idx})" title="${pronto?'Marcar pendente':'Marcar pronto'}">${btnTxt}</button>
         <span class="item-linha-nome" style="${pronto?'opacity:.45;text-decoration:line-through':''}">${esc(i.nome)}<span class="item-linha-qtd">×${i.qtd}</span></span>
       </div>
-      <span class="item-linha-preco" style="${pronto?'opacity:.45':''}">R$ ${i.preco*i.qtd}</span>
+      <div style="display:flex;align-items:center;gap:8px">
+        <span class="item-linha-preco" style="${pronto?'opacity:.45':''}">R$ ${i.preco*i.qtd}</span>
+        ${aberta?`<button onclick="window.removerItem('${c.id}',${idx})" title="Remover item"
+          style="width:28px;height:28px;border:none;background:transparent;color:var(--vermelho);font-size:18px;cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center">×</button>`:""}
+      </div>
     </div>`;
   }).join("") || `<div style="font-style:italic;color:var(--mocha);font-size:14px">Nenhum item ainda.</div>`;
 
@@ -429,7 +433,20 @@ window.lancarItem = async (comandaId) => {
   }
 };
 
-window.toggleItem = async (comandaId, itemIdx) => {
+window.removerItem = async (comandaId, itemIdx) => {
+  const comanda = todasComandas.find(c => c.id === comandaId);
+  if(!comanda) return;
+  const itens = comanda.itens || [];
+  const item  = itens[itemIdx];
+  if(!item) return;
+  if(!confirm(`Remover "${item.nome}" da comanda?`)) return;
+  const novosItens = itens.filter((_,i) => i !== itemIdx);
+  const novoTotal  = Math.max(0, (comanda.total||0) - (item.preco * item.qtd));
+  await updateDoc(doc(db,"comandas",comandaId),{ itens: novosItens, total: novoTotal });
+  mostrarToast(`✓ "${item.nome}" removido`);
+};
+
+
   const comanda = todasComandas.find(c => c.id === comandaId);
   if(!comanda) return;
   const itens = comanda.itens || [];
