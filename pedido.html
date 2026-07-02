@@ -147,6 +147,13 @@ body{background:var(--bg);font-family:'Jost',sans-serif;font-weight:300;color:va
   </div>
 </div>
 
+<!-- Aviso cardápio fechado -->
+<div id="cardapio-aviso" style="display:none;position:fixed;bottom:0;left:0;right:0;background:#2A1A08;border-top:1px solid #D4A843;padding:14px 1.25rem;align-items:center;justify-content:center;z-index:100">
+  <p style="font-family:'Cormorant Garamond',serif;font-style:italic;font-size:16px;color:#D4A843;text-align:center;line-height:1.5">
+    🕯️ O cardápio abre às 17h — aproveite o buffet de boas-vindas
+  </p>
+</div>
+
 <!-- CARRINHO -->
 <div class="carrinho-bar" id="carrinho-bar">
   <div class="carr-info">
@@ -195,7 +202,16 @@ onSnapshot(query(collection(db,"cardapio"), orderBy("cat","asc")), snap => {
 
 // Config — limite dinâmico em tempo real
 onSnapshot(doc(db,"config","evento"), snap => {
-  if(snap.exists() && snap.data().limite) LIMITE = snap.data().limite;
+  if(snap.exists()){
+    const d = snap.data();
+    if(d.limite) LIMITE = d.limite;
+    // cardápio aberto/fechado
+    const aberto = d.cardapio_aberto === true;
+    const bar = document.getElementById("carrinho-bar");
+    const aviso = document.getElementById("cardapio-aviso");
+    if(bar) bar.style.display = aberto ? "" : "none";
+    if(aviso) aviso.style.display = aberto ? "none" : "flex";
+  }
 });
 
 // Cardápio dinâmico — carregado do Firestore
@@ -297,6 +313,12 @@ window.identificar = async () => {
 };
 
 window.enviarPedido = async () => {
+  // verifica se cardápio está aberto
+  const cfgSnap = await getDoc(doc(db,"config","evento"));
+  if(cfgSnap.exists() && cfgSnap.data().cardapio_aberto !== true){
+    alert("O cardápio ainda não está disponível. Aguarde a abertura às 17h.");
+    return;
+  }
   const itens = Object.entries(carrinho)
     .filter(([,v])=>v.qtd>0)
     .map(([nome,v])=>{
