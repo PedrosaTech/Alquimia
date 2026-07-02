@@ -227,6 +227,15 @@ tbody td{padding:10px 14px;color:var(--espresso);font-weight:300;overflow:hidden
       </div>
 
       <div class="config-card">
+        <div class="config-titulo">Cardápio</div>
+        <div class="config-row">
+          <label>Disponível para pedidos</label>
+          <button id="btn-cardapio" class="btn-acao solid" onclick="window.toggleCardapio()" style="min-width:120px">—</button>
+        </div>
+        <div class="config-desc">Quando fechado, o cliente vê o cardápio mas não consegue fazer pedidos. Abra manualmente quando quiser liberar.</div>
+      </div>
+
+      <div class="config-card">
         <div class="config-titulo">Campo de acompanhantes</div>
         <div class="config-row">
           <label>Mostrar na landing</label>
@@ -512,9 +521,25 @@ function carregarConfig(){
         btn.style.background = ativo ? "var(--verde)" : "var(--vermelho)";
         btn.style.borderColor = ativo ? "var(--verde)" : "var(--vermelho)";
       }
+      // estado do cardápio
+      const btnC = document.getElementById("btn-cardapio");
+      if(btnC){
+        const aberto = d.cardapio_aberto === true;
+        btnC.textContent = aberto ? "✓ Aberto" : "Fechado";
+        btnC.style.background = aberto ? "var(--verde)" : "var(--vermelho)";
+        btnC.style.borderColor = aberto ? "var(--verde)" : "var(--vermelho)";
+      }
     }
   });
 }
+
+window.toggleCardapio = async () => {
+  const snap = await getDoc(doc(db,"config","evento"));
+  const atual = snap.exists() ? snap.data().cardapio_aberto === true : false;
+  const novo  = !atual;
+  await setDoc(doc(db,"config","evento"), {cardapio_aberto: novo}, {merge:true});
+  toast(`Cardápio ${novo ? "aberto ✓" : "fechado"}`);
+};
 
 window.toggleAcompanhantes = async () => {
   const snap = await getDoc(doc(db,"config","evento"));
