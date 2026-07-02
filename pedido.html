@@ -264,7 +264,7 @@ window.decrementar = (nome) => {
   atualizarCarrinho();
 };
 function atualizarQtd(nome){
-  const id = nome.replace(/\s+/g,"-").toLowerCase();
+  const id = nome.replace(/\s+/g,"-").toLowerCase().replace(/[^a-z0-9-]/g,"");
   const el = document.getElementById(`qtd-${id}`);
   if(el) el.textContent = carrinho[nome]?.qtd || 0;
 }
