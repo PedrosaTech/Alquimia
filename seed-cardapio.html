@@ -5,20 +5,23 @@
 <title>Seed Cardápio · Al-qui-mia</title>
 <style>
 body{font-family:sans-serif;padding:2rem;background:#1A120A;color:#F2EAD8}
-button{padding:12px 24px;background:#D4A843;color:#1A120A;border:none;font-size:16px;cursor:pointer;margin-top:1rem}
-#log{margin-top:1rem;font-size:13px;line-height:1.8;color:#C8A878}
+h2{color:#D4A843;margin-bottom:.5rem}
+p{color:#C8A878;margin-bottom:1.5rem;line-height:1.6}
+button{padding:12px 28px;background:#D4A843;color:#1A120A;border:none;font-size:16px;cursor:pointer;font-weight:600}
+button:disabled{background:#4A3820;color:#8A7256;cursor:not-allowed}
+#log{margin-top:1.5rem;font-size:14px;line-height:2;color:#C8A878;white-space:pre-line}
+.ok{color:#4CAF70}.err{color:#CF5555}
 </style>
 </head>
 <body>
 <h2>Seed do Cardápio — Café Al-qui-mia</h2>
-<p>Clique para popular o Firestore com o cardápio inicial.<br>
-<strong>Execute apenas uma vez.</strong></p>
-<button onclick="seed()">Popular cardápio no Firestore</button>
+<p>Apaga o cardápio atual e popula com o novo.<br>
+<strong style="color:#CF5555">Execute apenas uma vez. Ação irreversível.</strong></p>
+<button id="btn" onclick="seed()">Substituir cardápio no Firestore</button>
 <div id="log"></div>
-
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-app.js";
-import { getFirestore, collection, addDoc, setDoc, doc }
+import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, setDoc }
   from "https://www.gstatic.com/firebasejs/11.0.0/firebase-firestore.js";
 
 const firebaseConfig = {
@@ -32,49 +35,50 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db  = getFirestore(app);
 
-const ITENS = [
-  {cat:"quentes",nome:"Café Coado da Chapada",desc:"Grão da Chapada Diamantina, coado na hora com água de poço natural",preco:8,ativo:true},
-  {cat:"quentes",nome:"Café Alquímico",desc:"Café coado, leite de coco orgânico e canela colhida no Espaço — assinatura da casa",preco:16,ativo:true},
-  {cat:"quentes",nome:"Chá do Quintal",desc:"Capim-limão e erva-cidreira frescos do Mangará, água de poço natural",preco:10,ativo:true},
-  {cat:"quentes",nome:"Chá do Cravo com Canela",desc:"Folhas de cravo e canela da casa, infusão lenta em água de poço",preco:10,ativo:true},
-  {cat:"quentes",nome:"Chá de Nibs de Cacau",desc:"Infusão de nibs de cacau em água de poço — levemente amargo e reconfortante",preco:12,ativo:true},
-  {cat:"frias",nome:"Café Gelado do Mangará",desc:"Café coado da Chapada resfriado, leite de coco orgânico e canela da casa",preco:18,ativo:true},
-  {cat:"frias",nome:"Suco de Banana com Limão",desc:"Banana orgânica do Espaço, limão taiti ou galego — cremoso, sem adição de água",preco:14,ativo:true},
-  {cat:"frias",nome:"Água de Coco Natural",desc:"Colhida no Espaço Terapêutico Mangará, servida gelada",preco:10,ativo:true},
-  {cat:"frias",nome:"Limonada do Quintal",desc:"Limão galego ou taiti, capim-limão fresco, água de poço natural gelada",preco:12,ativo:true},
-  {cat:"frias",nome:"Licor de Jenipapo",desc:"Produção artesanal da casa — dose única, encorpado e aromático",preco:16,ativo:true},
-  {cat:"frias",nome:"Drinque Alquimia",desc:"Licor de jenipapo, água de coco, limão galego e capim-limão — combinação da casa",preco:22,ativo:true},
-  {cat:"comes",nome:"Pão Integral do Mangará",desc:"Artesanal integral com manteiga de óleo de coco, azeite e especiarias",preco:16,ativo:true},
-  {cat:"comes",nome:"Pão com Ora-pro-nóbis",desc:"Integral enriquecido com ora-pro-nóbis colhida no Espaço — alto teor proteico",preco:18,ativo:true},
-  {cat:"comes",nome:"Pãozinho de Polvilho",desc:"Sem lactose, leve e crocante — assado na hora",preco:12,ativo:true},
-  {cat:"comes",nome:"Tábua da Casa",desc:"Pão integral + pão ora-pro-nóbis + polvilho, manteiga de coco e geleia — para 2",preco:38,ativo:true},
-  {cat:"comes",nome:"Maionese de Ora-pro-nóbis",desc:"Artesanal com ora-pro-nóbis fresca do Espaço — acompanha pão ou polvilho",preco:14,ativo:true},
-  {cat:"doces",nome:"Doce de Jaca",desc:"Preparo artesanal lento, jaca madura do Espaço",preco:12,ativo:true},
-  {cat:"doces",nome:"Doce de Banana",desc:"Banana orgânica do Mangará com canela e cravo da casa",preco:12,ativo:true},
-  {cat:"doces",nome:"Doce de Carambola",desc:"Carambola em calda artesanal — cítrico e delicado",preco:12,ativo:true},
-  {cat:"doces",nome:"Geleia de Jaca",desc:"Produção artesanal da casa — acompanha pão ou polvilho",preco:10,ativo:true},
-  {cat:"doces",nome:"Geleia de Uva com Maçã",desc:"Blend artesanal frutado com acidez equilibrada",preco:10,ativo:true},
-  {cat:"doces",nome:"Trio de Doces do Espaço",desc:"Uma porção de jaca, banana e carambola — para provar tudo",preco:30,ativo:true},
+const CARDAPIO = [
+  {cat:"bebidas",nome:"Elixir Negro",preco:10,desc:"O café especial em sua forma mais pura e desperta.",ativo:true},
+  {cat:"bebidas",nome:"Alquimia Branca",preco:16,desc:"O encontro do café especial com a essência do leite de coco.",ativo:true},
+  {cat:"bebidas",nome:"Pedra do Sol",preco:18,desc:"Café especial, leite de coco e cacau. Três elementos ancestrais em uma única xícara.",ativo:true},
+  {cat:"bebidas",nome:"Poção da Leveza",preco:14,desc:"Suco cremoso de banana com limão. Revitalizante.",ativo:true},
+  {cat:"bebidas",nome:"Verde Essencial",preco:14,desc:"Suco de couve, limão e gengibre. Para os corajosos.",ativo:true},
+  {cat:"bebidas",nome:"Elixir da Lua Vermelha",preco:14,desc:"Limonada de limão, essência de beterraba e água com gás. Refrescante como uma revelação.",ativo:true},
+  {cat:"bebidas",nome:"Água da Fonte",preco:10,desc:"Água de coco colhida aqui no Espaço. Servida gelada.",ativo:true},
+  {cat:"comidas",nome:"Pedra Filosofal",preco:32,desc:"Focaccia artesanal (300g) com creme de amendoim e folhas verdes. O simples transformado em precioso.",ativo:true},
+  {cat:"comidas",nome:"Tríade Alquímica",preco:28,desc:"Três esfiras artesanais veganas e sem glúten com cremes de amendoim, ora-pro-nóbis e tomate seco. Três elementos em perfeita harmonia.",ativo:true},
+  {cat:"comidas",nome:"Ritual do Dia",preco:22,desc:"Quatro fatias de pão integral com geleia de uva e maçã e manteiga vegetal de coco. Um convite para uma pausa de presença e sabor.",ativo:true},
+  {cat:"comidas",nome:"Caldeirão da Casa",preco:26,desc:"Creme artesanal de ervilhas, lentilhas ou abóbora conforme inspiração do dia, com duas fatias de pão integral. O alimento que aquece e acolhe.",ativo:true},
+  {cat:"comidas",nome:"Doce Transmutação",preco:20,desc:"Três esfiras integrais com geleia probiótica de maçã e canela. O final perfeito para um pequeno ritual de sabor.",ativo:true},
+  {cat:"comidas",nome:"Lua de Coco",preco:18,desc:"Cinco panelinhas de coco artesanal. Um doce delicado que transforma simplicidade em encantamento.",ativo:true},
 ];
 
 const log = document.getElementById("log");
+const linha = (txt,cls) => { log.innerHTML += `<span class="${cls||""}">${txt}\n</span>`; };
 
 window.seed = async () => {
-  log.textContent = "Iniciando…\n";
+  const btn = document.getElementById("btn");
+  btn.disabled = true; btn.textContent = "Executando…";
+  log.innerHTML = "";
   try {
-    for(const item of ITENS){
+    linha("🗑️  Apagando cardápio atual…");
+    const snap = await getDocs(collection(db,"cardapio"));
+    for(const d of snap.docs) await deleteDoc(doc(db,"cardapio",d.id));
+    linha(`   ${snap.size} itens removidos.`,"ok");
+    linha("\n✨ Inserindo novo cardápio…");
+    for(const item of CARDAPIO){
       await addDoc(collection(db,"cardapio"), item);
-      log.textContent += `✓ ${item.nome}\n`;
+      linha(`   ✓ ${item.nome} — R$ ${item.preco}`,"ok");
     }
-    // Config inicial
+    linha("\n⚙️  Atualizando config…");
     await setDoc(doc(db,"config","evento"),{
-      limite: 30,
-      data: "18 de Julho",
-      hora: "15h às 21h"
-    });
-    log.textContent += "\n✅ Cardápio e config populados com sucesso!\nVocê pode fechar esta página.";
+      limite:30, data:"18 de Julho", hora:"15h às 21h",
+      cardapio_aberto:false, acompanhantes_ativo:true
+    },{merge:true});
+    linha("   ✓ Config atualizada.","ok");
+    linha("\n✅ Concluído! Pode fechar esta página.","ok");
+    btn.textContent = "Concluído ✓";
   } catch(e) {
-    log.textContent += `\n❌ Erro: ${e.message}`;
+    linha(`\n❌ Erro: ${e.message}`,"err");
+    btn.disabled = false; btn.textContent = "Tentar novamente";
   }
 };
 </script>
