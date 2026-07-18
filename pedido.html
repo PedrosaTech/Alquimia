@@ -120,29 +120,20 @@ body{background:var(--bg);font-family:'Jost',sans-serif;font-weight:300;color:va
 
   <div class="body">
 
-    <!-- QUENTES -->
+    <!-- BEBIDAS -->
     <div class="secao ativa" id="sec-0">
-      <div class="sec-titulo">Bebidas quentes</div>
+      <div class="sec-titulo">Bebidas</div>
       <div id="items-0"></div>
     </div>
 
-    <!-- FRIAS -->
+    <!-- COMIDAS -->
     <div class="secao" id="sec-1">
-      <div class="sec-titulo">Bebidas frias</div>
+      <div class="sec-titulo">Comidas</div>
       <div id="items-1"></div>
     </div>
 
-    <!-- COMES -->
-    <div class="secao" id="sec-2">
-      <div class="sec-titulo">Comes leves</div>
-      <div id="items-2"></div>
-    </div>
-
-    <!-- DOCES -->
-    <div class="secao" id="sec-3">
-      <div class="sec-titulo">Doces & afetos</div>
-      <div id="items-3"></div>
-    </div>
+  </div>
+</div>
 
   </div>
 </div>
@@ -215,7 +206,7 @@ onSnapshot(doc(db,"config","evento"), snap => {
 });
 
 // Cardápio dinâmico — carregado do Firestore
-const CATS_ORDER = ["quentes","frias","comes","doces"];
+const CATS_ORDER = ["bebidas","comidas"];
 let catalogoAtual = []; // fonte de verdade dos preços
 
 function renderizarCardapio(itens){
