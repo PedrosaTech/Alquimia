@@ -337,8 +337,14 @@ tbody td{padding:10px 14px;color:var(--espresso);font-weight:300;overflow:hidden
       <input type="color" id="ev-cor" value="#9A4A8A" style="height:42px;padding:2px 6px;cursor:pointer">
     </div>
     <div class="mf">
-      <label>URL da foto (link direto da imagem)</label>
-      <input type="text" id="ev-foto" placeholder="https://... (Google Fotos, Dropbox, etc)">
+      <label>Foto da aniversariante</label>
+      <div id="foto-upload-area" style="border:.5px dashed var(--border);padding:1rem;text-align:center;background:#FDFAF3;cursor:pointer" onclick="document.getElementById('ev-foto-file').click()">
+        <img id="ev-foto-preview" src="" alt="" style="display:none;width:80px;height:80px;border-radius:50%;object-fit:cover;margin:0 auto .5rem">
+        <div id="ev-foto-txt" style="font-size:13px;font-style:italic;color:var(--mocha)">Clique para escolher a foto</div>
+        <div id="ev-foto-nome" style="font-size:11px;color:var(--gold);margin-top:4px"></div>
+      </div>
+      <input type="file" id="ev-foto-file" accept="image/*" style="display:none" onchange="window.previewFoto(this)">
+      <input type="hidden" id="ev-foto" placeholder="">
     </div>
     <div class="mf">
       <label>Limite de convidados</label>
@@ -372,7 +378,7 @@ tbody td{padding:10px 14px;color:var(--espresso);font-weight:300;overflow:hidden
  'salvarVagas','salvarEvento','toggleAcompanhantes','toggleCardapio',
  'limparColecao','limparTudo',
  'abrirModalEvento','editarEvento','fecharModalEvento','salvarEvento2',
- 'toggleEvento','verConfirmados','exportarConfEv','toast'
+ 'toggleEvento','verConfirmados','exportarConfEv','toast','previewFoto'
 ].forEach(fn => { window[fn] = function(){
   console.warn(fn + ' ainda carregando…');
 }; });
@@ -384,6 +390,9 @@ import {
   updateDoc, addDoc, setDoc, getDocs, getDoc, where,
   query, orderBy, deleteDoc
 } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-firestore.js";
+import {
+  getStorage, ref, uploadBytes, getDownloadURL
+} from "https://www.gstatic.com/firebasejs/11.0.0/firebase-storage.js";
 
 const firebaseConfig = {
   apiKey:            "AIzaSyBe76lIVYlw2FrFytDA74HacROTGhyQs6k",
@@ -396,8 +405,24 @@ const firebaseConfig = {
 const SENHA_ADMIN = "0866";
 const LIMITE_PADRAO = 30;
 
-const app = initializeApp(firebaseConfig);
-const db  = getFirestore(app);
+const app     = initializeApp(firebaseConfig);
+const db      = getFirestore(app);
+const storage = getStorage(app);
+
+// ── FOTO PREVIEW ─────────────────────────────────────────
+window.previewFoto = (input) => {
+  const file = input.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    const prev = document.getElementById("ev-foto-preview");
+    prev.src = e.target.result;
+    prev.style.display = "block";
+    document.getElementById("ev-foto-txt").textContent  = "Foto selecionada ✓";
+    document.getElementById("ev-foto-nome").textContent = file.name;
+  };
+  reader.readAsDataURL(file);
+};
 
 let todosRegistros = [];
 let cardapioItens  = [];
@@ -734,33 +759,65 @@ window.editarEvento = (id) => {
   document.getElementById("ev-msg").value    = ev.mensagem||"";
   document.getElementById("ev-foto").value   = ev.foto||"";
   document.getElementById("ev-cor").value    = ev.cor||"#9A4A8A";
+  // mostra preview da foto atual se existir
+  if(ev.foto){
+    const prev = document.getElementById("ev-foto-preview");
+    prev.src = ev.foto; prev.style.display = "block";
+    document.getElementById("ev-foto-txt").textContent = "Foto atual — clique para trocar";
+  }
   document.getElementById("ev-limite").value = ev.limite||30;
   document.getElementById("modal-evento").classList.add("aberto");
 };
 
 window.fecharModalEvento = () => {
   document.getElementById("modal-evento").classList.remove("aberto");
+  document.getElementById("ev-foto-file").value = "";
+  document.getElementById("ev-foto-preview").style.display = "none";
+  document.getElementById("ev-foto-txt").textContent = "Clique para escolher a foto";
+  document.getElementById("ev-foto-nome").textContent = "";
+  document.getElementById("ev-foto").value = "";
   editandoEvId = null;
 };
 
 window.salvarEvento2 = async () => {
-  const nome     = document.getElementById("ev-nome").value.trim();
-  const data     = document.getElementById("ev-data").value.trim();
-  const hora     = document.getElementById("ev-hora").value.trim();
-  const mensagem = document.getElementById("ev-msg").value.trim();
-  const cor      = document.getElementById("ev-cor").value;
-  const limite   = parseInt(document.getElementById("ev-limite").value)||30;
+  const nome      = document.getElementById("ev-nome").value.trim();
+  const data      = document.getElementById("ev-data").value.trim();
+  const hora      = document.getElementById("ev-hora").value.trim();
+  const mensagem  = document.getElementById("ev-msg").value.trim();
+  const cor       = document.getElementById("ev-cor").value;
+  const limite    = parseInt(document.getElementById("ev-limite").value)||30;
+  const fotoInput = document.getElementById("ev-foto-file");
   if(!nome){ alert("Informe o nome da aniversariante."); return; }
-  const dados = {nome, data, hora, mensagem, cor, limite, ativo:true};
-  if(editandoEvId){
-    await updateDoc(doc(db,"eventos",editandoEvId), dados);
-    toast("Evento atualizado");
-  } else {
-    dados.criadoEm = new Date().toISOString();
-    const ref = await addDoc(collection(db,"eventos"), dados);
-    toast("Evento criado ✓");
+
+  const btn = document.querySelector("#modal-evento .btn-modal-ok");
+  btn.disabled = true; btn.textContent = "Salvando…";
+
+  try {
+    let fotoUrl = document.getElementById("ev-foto").value || "";
+    if(fotoInput && fotoInput.files && fotoInput.files[0]){
+      const file = fotoInput.files[0];
+      const id   = editandoEvId || `novo_${Date.now()}`;
+      const storRef = ref(storage, `eventos/${id}/foto_${Date.now()}`);
+      btn.textContent = "Enviando foto…";
+      const uploaded = await uploadBytes(storRef, file);
+      fotoUrl = await getDownloadURL(uploaded.ref);
+    }
+    const dados = {nome, data, hora, mensagem, cor, limite, foto:fotoUrl, ativo:true};
+    if(editandoEvId){
+      await updateDoc(doc(db,"eventos",editandoEvId), dados);
+      toast("Evento atualizado ✓");
+    } else {
+      dados.criadoEm = new Date().toISOString();
+      await addDoc(collection(db,"eventos"), dados);
+      toast("Evento criado ✓");
+    }
+    fecharModalEvento();
+  } catch(e){
+    console.error(e);
+    alert("Erro ao salvar: " + e.message);
+  } finally {
+    btn.disabled = false; btn.textContent = "Salvar evento";
   }
-  fecharModalEvento();
 };
 
 window.toggleEvento = async (id, ativar) => {
