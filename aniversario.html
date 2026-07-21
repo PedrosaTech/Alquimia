@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Convite · Café Alquimia</title>
+<meta id="og-title" property="og:title" content="Você está convidado!">
+<meta id="og-desc"  property="og:description" content="Confirme sua presença">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400;1,500&family=EB+Garamond:ital,wght@0,400;1,400&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --cor:    #9A4A8A;
+  --perg:   #F3EADA;
+  --perg-dk:#E8DCC8;
+  --espresso:#2A1A08;
+  --mocha:  #5A3A18;
+  --border: #D4C4A0;
+  --mist:   #FAF6EE;
+}
+body{background:var(--mist);font-family:'EB Garamond',serif;color:var(--espresso);min-height:100vh}
+
+/* LOADING */
+.loading{min-height:100vh;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:1rem}
+.loading-dot{width:8px;height:8px;border-radius:50%;background:var(--cor);animation:pulse 1.2s infinite}
+@keyframes pulse{0%,100%{opacity:.3;transform:scale(.8)}50%{opacity:1;transform:scale(1.2)}}
+
+/* ERRO */
+.erro-wrap{min-height:100vh;display:none;align-items:center;justify-content:center;padding:2rem;text-align:center}
+.erro-txt{font-family:'Cormorant Garamond',serif;font-size:22px;font-style:italic;color:var(--mocha)}
+
+/* HEADER */
+.hdr{text-align:center;padding:3rem 1.5rem 2.5rem;border-bottom:1px solid var(--border)}
+.hdr-eyebrow{font-size:11px;letter-spacing:.3em;text-transform:uppercase;margin-bottom:1.25rem}
+.ornamento{display:flex;align-items:center;justify-content:center;gap:12px;margin-bottom:1.25rem}
+.orn-linha{height:.5px;width:50px}
+.orn-diamond{width:6px;height:6px;border:.5px solid currentColor;transform:rotate(45deg);flex-shrink:0}
+.hdr-pre{font-family:'Cormorant Garamond',serif;font-size:14px;font-weight:300;letter-spacing:.3em;text-transform:uppercase;margin-bottom:.2rem}
+.hdr-nome{font-family:'Cormorant Garamond',serif;font-size:58px;font-weight:300;font-style:italic;line-height:1;margin-bottom:1.75rem}
+.hdr-msg{max-width:440px;margin:0 auto 2rem;font-style:italic;font-size:18px;line-height:1.9}
+.data-bloco{display:inline-block;padding:.875rem 2.5rem;border-top:.5px solid currentColor;border-bottom:.5px solid currentColor}
+.data-txt{font-family:'Cormorant Garamond',serif;font-size:28px;font-weight:400;margin-bottom:.2rem}
+.hora-txt{font-style:italic;font-size:16px;letter-spacing:.08em}
+
+/* LOCAL */
+.local-wrap{background:var(--perg);border-bottom:.5px solid var(--border);padding:1.5rem;text-align:center}
+.local-logo{height:64px;object-fit:contain;margin-bottom:.75rem;opacity:.85}
+.local-nome{font-family:'Cormorant Garamond',serif;font-size:18px;font-style:italic;color:var(--espresso);margin-bottom:3px}
+.local-end{font-size:13px;color:var(--mocha);letter-spacing:.05em}
+
+/* VAGAS */
+.vagas-wrap{max-width:520px;margin:0 auto;padding:2rem 1.5rem 0}
+.vagas-label{display:flex;justify-content:space-between;font-size:14px;font-style:italic;color:var(--mocha);margin-bottom:7px}
+.prog-track{height:1.5px;background:var(--perg-dk)}
+.prog-fill{height:1.5px;transition:width .7s ease}
+
+/* FORM */
+.form-wrap{max-width:520px;margin:0 auto;padding:2rem 1.5rem 3rem}
+.sec-lbl{text-align:center;font-style:italic;font-size:17px;display:flex;align-items:center;gap:12px;margin-bottom:1.5rem}
+.sec-lbl::before,.sec-lbl::after{content:'';flex:1;height:.5px;background:var(--border)}
+.form{display:flex;flex-direction:column;gap:14px}
+.field{display:flex;flex-direction:column;gap:6px}
+.field label{font-size:10px;letter-spacing:.25em;text-transform:uppercase;color:var(--mocha);font-family:'Cormorant Garamond',serif}
+.field input,.field select{width:100%;height:48px;padding:0 14px;background:var(--perg);border:.5px solid var(--border);border-radius:0;font-family:'EB Garamond',serif;font-size:17px;color:var(--espresso);outline:none;appearance:none;-webkit-appearance:none;transition:border-color .2s}
+.field input::placeholder{font-style:italic}
+.field-row{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.sel-wrap{position:relative}
+.sel-wrap::after{content:'';position:absolute;right:14px;top:50%;transform:translateY(-50%) rotate(45deg);width:6px;height:6px;border-right:.5px solid currentColor;border-bottom:.5px solid currentColor;pointer-events:none;opacity:.5}
+.erro-msg{display:none;font-size:13px;font-style:italic;color:#7A2020;text-align:center;padding:8px;background:#F8EDEC;border:.5px solid #D8AAAA}
+.btn-main{width:100%;padding:15px;border:none;font-family:'Cormorant Garamond',serif;font-size:18px;font-style:italic;letter-spacing:.12em;cursor:pointer;transition:opacity .2s;color:#fff}
+.btn-main:hover{opacity:.88}
+.btn-main:disabled{opacity:.5;cursor:not-allowed}
+
+/* ESGOTADO */
+.esgotado{display:none;text-align:center;padding:2.5rem 1rem;border:.5px solid var(--border)}
+.esgotado-titulo{font-family:'Cormorant Garamond',serif;font-size:24px;font-style:italic;color:var(--espresso);margin-bottom:.75rem}
+.esgotado-msg{font-size:15px;font-style:italic;color:var(--mocha);line-height:1.9;margin-bottom:1.5rem}
+
+/* SUCESSO */
+.sucesso{display:none;text-align:center;padding:3rem 1rem}
+.sucesso-orn{font-size:22px;margin-bottom:1rem;letter-spacing:.3em}
+.sucesso-titulo{font-family:'Cormorant Garamond',serif;font-size:30px;font-style:italic;margin-bottom:.75rem}
+.sucesso-msg{font-size:15px;font-style:italic;color:var(--mocha);line-height:1.9;margin-bottom:1.75rem}
+.btn-wpp{display:inline-flex;align-items:center;gap:8px;padding:11px 24px;border:.5px solid currentColor;background:transparent;font-family:'Cormorant Garamond',serif;font-size:15px;font-style:italic;letter-spacing:.08em;cursor:pointer;text-decoration:none;transition:background .2s,color .2s}
+
+/* RODAPÉ */
+.ftr{background:var(--espresso);padding:1.25rem;text-align:center;border-top:.5px solid #4A3820}
+.ftr-brand{font-family:'Cormorant Garamond',serif;font-size:14px;font-style:italic;color:#D4A843;letter-spacing:.08em;margin-bottom:4px}
+.ftr-dev{font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:#6A5230}
+
+@media(max-width:480px){
+  .hdr-nome{font-size:42px}
+  .field-row{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+
+<div class="loading" id="loading">
+  <div class="loading-dot"></div>
+  <p style="font-family:'Cormorant Garamond',serif;font-style:italic;color:#9A7A5A;font-size:16px">carregando seu convite…</p>
+</div>
+
+<div class="erro-wrap" id="erro-wrap">
+  <div>
+    <p class="erro-txt">Este convite não foi encontrado ou está inativo.</p>
+    <p style="font-size:14px;color:#9A7A5A;margin-top:1rem">Verifique o link recebido.</p>
+  </div>
+</div>
+
+<div id="pagina" style="display:none">
+
+  <header class="hdr" id="hdr">
+    <p class="hdr-eyebrow" id="hdr-eyebrow">Você está convidado ✨</p>
+    <div class="ornamento" id="ornamento">
+      <div class="orn-linha"></div>
+      <div class="orn-diamond"></div>
+      <div class="orn-linha"></div>
+    </div>
+    <p class="hdr-pre">Aniversário de</p>
+    <h1 class="hdr-nome" id="hdr-nome">—</h1>
+    <p class="hdr-msg" id="hdr-msg"></p>
+    <div class="data-bloco" id="data-bloco">
+      <div class="data-txt" id="data-txt">—</div>
+      <div class="hora-txt" id="hora-txt">—</div>
+    </div>
+  </header>
+
+  <div class="local-wrap">
+    <img id="local-logo" src="" alt="Café Alquimia" class="local-logo" style="display:none">
+    <div class="local-nome">Café Alquimia</div>
+    <div class="local-end">Espaço Terapêutico Mangará · Camaçari – BA</div>
+  </div>
+
+  <div class="vagas-wrap">
+    <div class="vagas-label">
+      <span>Vagas disponíveis</span>
+      <span id="vagas-txt">carregando…</span>
+    </div>
+    <div class="prog-track">
+      <div class="prog-fill" id="prog-fill" style="width:0%"></div>
+    </div>
+  </div>
+
+  <div class="form-wrap">
+
+    <div id="section-form">
+      <div class="sec-lbl" id="sec-lbl">confirme sua presença</div>
+      <form class="form" onsubmit="confirmar(event)">
+        <div class="field">
+          <label>Seu nome</label>
+          <input type="text" id="nome" placeholder="Como você se chama" required>
+        </div>
+        <div class="field-row">
+          <div class="field">
+            <label>WhatsApp</label>
+            <input type="tel" id="wpp" placeholder="(71) 9 0000-0000" required>
+          </div>
+          <div class="field" id="campo-qtd">
+            <label>Acompanhantes</label>
+            <div class="sel-wrap">
+              <select id="qtd">
+                <option value="1">Somente eu</option>
+                <option value="2">+ 1 pessoa</option>
+                <option value="3">+ 2 pessoas</option>
+                <option value="4">+ 3 pessoas</option>
+              </select>
+            </div>
+          </div>
+        </div>
+        <div class="erro-msg" id="erro"></div>
+        <button type="submit" class="btn-main" id="btn-submit">Confirmar presença</button>
+      </form>
+    </div>
+
+    <div class="esgotado" id="section-esgotado">
+      <div class="esgotado-titulo">Vagas encerradas.</div>
+      <p class="esgotado-msg">Todas as vagas foram preenchidas.<br>Entre em contato para saber mais.</p>
+      <a class="btn-wpp" id="btn-espera" href="#" target="_blank">Lista de espera</a>
+    </div>
+
+    <div class="sucesso" id="section-sucesso">
+      <div class="sucesso-orn">· ✦ ·</div>
+      <div class="sucesso-titulo" id="sucesso-titulo">Até lá, então!</div>
+      <p class="sucesso-msg" id="sucesso-msg">Presença confirmada com carinho.<br>Será uma celebração especial.</p>
+      <a class="btn-wpp" id="btn-wpp" href="#" target="_blank">Salvar no WhatsApp</a>
+    </div>
+
+  </div>
+</div>
+
+<footer class="ftr">
+  <div class="ftr-brand">Café Alquimia · Espaço Terapêutico Mangará</div>
+  <div class="ftr-dev">Desenvolvido por Código da Terra</div>
+</footer>
+
+<script type="module">
+import { initializeApp }    from "https://www.gstatic.com/firebasejs/11.0.0/firebase-app.js";
+import { getFirestore, doc, getDoc, collection, addDoc, onSnapshot, query, where }
+  from "https://www.gstatic.com/firebasejs/11.0.0/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey:"AIzaSyBe76lIVYlw2FrFytDA74HacROTGhyQs6k",
+  authDomain:"alquimia-7dfd3.firebaseapp.com",
+  projectId:"alquimia-7dfd3",
+  storageBucket:"alquimia-7dfd3.firebasestorage.app",
+  messagingSenderId:"638103115384",
+  appId:"1:638103115384:web:083c881afc8df705ba3f8d"
+};
+
+const app = initializeApp(firebaseConfig);
+const db  = getFirestore(app);
+
+// Lê o ?id= da URL
+const params  = new URLSearchParams(window.location.search);
+const eventoId = params.get("id");
+
+let evento = null;
+let totalOcupado = 0;
+let LIMITE = 30;
+
+async function init(){
+  if(!eventoId){
+    mostrarErro(); return;
+  }
+
+  // carrega dados do evento
+  const snap = await getDoc(doc(db,"eventos",eventoId));
+  if(!snap.exists() || snap.data().ativo === false){
+    mostrarErro(); return;
+  }
+
+  evento = snap.data();
+  LIMITE = evento.limite || 30;
+  aplicarTema(evento);
+
+  // stream de confirmações deste evento
+  onSnapshot(
+    query(collection(db,"confirmacoes_evento"), where("evento_id","==",eventoId)),
+    (s) => {
+      totalOcupado = 0;
+      s.forEach(d => { totalOcupado += (d.data().qtd||1); });
+      atualizarVagas();
+    }
+  );
+
+  document.getElementById("loading").style.display = "none";
+  document.getElementById("pagina").style.display  = "block";
+}
+
+function aplicarTema(ev){
+  const cor = ev.cor || "#9A4A8A";
+
+  // aplica cor como variável CSS
+  document.documentElement.style.setProperty("--cor", cor);
+
+  // elementos que usam a cor
+  document.getElementById("hdr").style.background       = cor + "12"; // 7% opacidade
+  document.getElementById("hdr").style.borderBottomColor= cor + "55";
+  document.getElementById("hdr-eyebrow").style.color    = cor;
+  document.getElementById("ornamento").style.color      = cor;
+  document.querySelectorAll(".orn-linha").forEach(el => el.style.background = cor);
+  document.getElementById("data-bloco").style.borderColor = cor;
+  document.getElementById("data-txt").style.color       = cor;
+  document.getElementById("prog-fill").style.background = cor;
+  document.getElementById("sec-lbl").style.color        = cor;
+  document.getElementById("btn-submit").style.background= cor;
+  document.querySelector(".btn-wpp").style.color        = cor;
+  document.querySelector(".btn-wpp").style.borderColor  = cor;
+
+  // conteúdo
+  document.getElementById("hdr-nome").textContent  = ev.nome || "Aniversário";
+  document.getElementById("hdr-msg").textContent   = ev.mensagem || "Venha celebrar conosco!";
+  document.getElementById("data-txt").textContent  = ev.data || "—";
+  document.getElementById("hora-txt").textContent  = ev.hora || "—";
+  document.getElementById("sucesso-titulo").textContent = `Até lá, ${ev.nome?.split(" ")[0] || ""}!`;
+  document.getElementById("sucesso-msg").textContent    = `Presença confirmada com carinho.\nAté o aniversário de ${ev.nome?.split(" ")[0] || ""}!`;
+
+  // og tags
+  document.getElementById("og-title").content = `Aniversário de ${ev.nome} · Café Alquimia`;
+  document.getElementById("og-desc").content  = `${ev.mensagem || "Venha celebrar!"} — ${ev.data}, ${ev.hora}`;
+  document.title = `Aniversário de ${ev.nome} · Café Alquimia`;
+
+  // WhatsApp link
+  const wppMsg = encodeURIComponent(`Confirmei presença no aniversário de ${ev.nome}! 🎉`);
+  document.getElementById("btn-wpp").href    = `https://wa.me/5571983578578?text=${wppMsg}`;
+  document.getElementById("btn-espera").href = `https://wa.me/5571983578578?text=${encodeURIComponent(`Gostaria de entrar na lista de espera do aniversário de ${ev.nome}`)}`;
+}
+
+function atualizarVagas(){
+  const livre = LIMITE - totalOcupado;
+  const pct   = Math.min(Math.round((totalOcupado/LIMITE)*100),100);
+  document.getElementById("vagas-txt").textContent = livre > 0 ? `${livre} de ${LIMITE}` : "Esgotado";
+  document.getElementById("prog-fill").style.width = pct + "%";
+  if(livre <= 0){
+    document.getElementById("section-form").style.display    = "none";
+    document.getElementById("section-esgotado").style.display= "block";
+  }
+}
+
+function mostrarErro(){
+  document.getElementById("loading").style.display   = "none";
+  document.getElementById("erro-wrap").style.display = "flex";
+}
+
+window.confirmar = async (e) => {
+  e.preventDefault();
+  const nome  = document.getElementById("nome").value.trim();
+  const wpp   = document.getElementById("wpp").value.trim();
+  const qtd   = parseInt(document.getElementById("qtd").value);
+  const erro  = document.getElementById("erro");
+  const btn   = document.getElementById("btn-submit");
+
+  erro.style.display = "none";
+
+  if(totalOcupado + qtd > LIMITE){
+    erro.textContent = `Restam apenas ${LIMITE-totalOcupado} vaga(s). Ajuste o número de pessoas.`;
+    erro.style.display = "block"; return;
+  }
+
+  btn.disabled = true; btn.textContent = "Registrando…";
+
+  try {
+    await addDoc(collection(db,"confirmacoes_evento"),{
+      evento_id: eventoId,
+      nome, wpp, qtd,
+      criadoEm: new Date().toISOString()
+    });
+    document.getElementById("section-form").style.display   = "none";
+    document.getElementById("section-sucesso").style.display= "block";
+  } catch(err){
+    erro.textContent = "Erro ao registrar. Tente novamente.";
+    erro.style.display = "block";
+    btn.disabled = false;
+    btn.textContent = "Confirmar presença";
+  }
+};
+
+init();
+</script>
+</body>
+</html>
