@@ -718,17 +718,23 @@ function renderizarEventos(){
   const caminho = window.location.pathname
     .replace(/\/admin(\.html)?$/, "")  // remove /admin ou /admin.html do final
     .replace(/\/$/, "");               // remove barra final se houver
-  const base = origem + caminho + "/aniversario.html";
+  const baseUrl       = origem + caminho;
+  const baseConvite   = baseUrl + "/aniversario.html";
+  const baseConvidados= baseUrl + "/convidados.html";
   el.innerHTML = eventos.map(ev => {
-    const link = `${base}?id=${ev.id}`;
+    const linkConvite    = `${baseConvite}?id=${ev.id}`;
+    const linkConvidados = `${baseConvidados}?id=${ev.id}`;
     const ativo = ev.ativo !== false;
     return `<div class="evento-card">
       <div class="evento-cor" style="background:${ev.cor||'#9A4A8A'}"></div>
       <div class="evento-info">
         <div class="evento-nome">${esc(ev.nome||"—")}</div>
         <div class="evento-meta">${esc(ev.data||"")} · ${esc(ev.hora||"")} · ${ev.limite||30} vagas</div>
-        <div class="evento-link" onclick="navigator.clipboard.writeText('${link}').then(()=>toast('Link copiado!'))">
+        <div class="evento-link" onclick="navigator.clipboard.writeText('${linkConvite}').then(()=>toast('Link do convite copiado!'))">
           📋 Copiar link do convite
+        </div>
+        <div class="evento-link" style="margin-top:4px" onclick="navigator.clipboard.writeText('${linkConvidados}').then(()=>toast('Link da lista copiado!'))">
+          👥 Copiar link da lista (para a aniversariante)
         </div>
       </div>
       <div class="evento-acoes">
