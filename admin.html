@@ -684,7 +684,12 @@ function renderizarEventos(){
     el.innerHTML = `<div style="padding:2rem;text-align:center;font-style:italic;color:var(--mocha)">Nenhum evento cadastrado ainda.</div>`;
     return;
   }
-  const base = window.location.origin + window.location.pathname.replace("admin.html","aniversario.html");
+  // monta base robusta — funciona com ou sem .html na URL
+  const origem  = window.location.origin;
+  const caminho = window.location.pathname
+    .replace(/\/admin(\.html)?$/, "")  // remove /admin ou /admin.html do final
+    .replace(/\/$/, "");               // remove barra final se houver
+  const base = origem + caminho + "/aniversario.html";
   el.innerHTML = eventos.map(ev => {
     const link = `${base}?id=${ev.id}`;
     const ativo = ev.ativo !== false;
