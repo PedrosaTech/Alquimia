@@ -337,6 +337,10 @@ tbody td{padding:10px 14px;color:var(--espresso);font-weight:300;overflow:hidden
       <input type="color" id="ev-cor" value="#9A4A8A" style="height:42px;padding:2px 6px;cursor:pointer">
     </div>
     <div class="mf">
+      <label>URL da foto (link direto da imagem)</label>
+      <input type="text" id="ev-foto" placeholder="https://... (Google Fotos, Dropbox, etc)">
+    </div>
+    <div class="mf">
       <label>Limite de convidados</label>
       <input type="number" id="ev-limite" value="30" min="1" max="200">
     </div>
@@ -714,7 +718,7 @@ function renderizarEventos(){
 window.abrirModalEvento = () => {
   editandoEvId = null;
   document.getElementById("modal-evento-titulo").textContent = "Novo evento";
-  ["ev-nome","ev-data","ev-hora","ev-msg"].forEach(id => document.getElementById(id).value = "");
+  ["ev-nome","ev-data","ev-hora","ev-msg","ev-foto"].forEach(id => document.getElementById(id).value = "");
   document.getElementById("ev-cor").value    = "#9A4A8A";
   document.getElementById("ev-limite").value = 30;
   document.getElementById("modal-evento").classList.add("aberto");
@@ -728,6 +732,7 @@ window.editarEvento = (id) => {
   document.getElementById("ev-data").value   = ev.data||"";
   document.getElementById("ev-hora").value   = ev.hora||"";
   document.getElementById("ev-msg").value    = ev.mensagem||"";
+  document.getElementById("ev-foto").value   = ev.foto||"";
   document.getElementById("ev-cor").value    = ev.cor||"#9A4A8A";
   document.getElementById("ev-limite").value = ev.limite||30;
   document.getElementById("modal-evento").classList.add("aberto");
