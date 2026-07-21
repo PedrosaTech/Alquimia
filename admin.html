@@ -368,7 +368,7 @@ tbody td{padding:10px 14px;color:var(--espresso);font-weight:300;overflow:hidden
  'salvarVagas','salvarEvento','toggleAcompanhantes','toggleCardapio',
  'limparColecao','limparTudo',
  'abrirModalEvento','editarEvento','fecharModalEvento','salvarEvento2',
- 'toggleEvento','verConfirmados','exportarConfEv'
+ 'toggleEvento','verConfirmados','exportarConfEv','toast'
 ].forEach(fn => { window[fn] = function(){
   console.warn(fn + ' ainda carregando…');
 }; });
@@ -806,11 +806,14 @@ window.exportarConfEv = () => {
   a.click();
 };
 
-function toast(msg){
+window.toast = function(msg, cor){
   const t = document.getElementById("toast");
-  t.textContent=msg; t.classList.add("show");
-  setTimeout(()=>t.classList.remove("show"),2500);
+  t.textContent=msg;
+  if(cor) t.style.background=cor;
+  t.classList.add("show");
+  setTimeout(()=>{ t.classList.remove("show"); t.style.background=""; },2500);
 }
+function toast(msg, cor){ window.toast(msg, cor); }
 function esc(s){ return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
 </script>
 </body>
