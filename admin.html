@@ -138,9 +138,9 @@ tbody td{padding:10px 14px;color:var(--espresso);font-weight:300;overflow:hidden
     <div class="login-sub">Painel administrativo</div>
     <div class="lf">
       <label>Senha</label>
-      <input type="password" id="senha-input" placeholder="••••••••" onkeydown="if(event.key==='Enter')entrar()">
+      <input type="password" id="senha-input" placeholder="••••••••" onkeydown="if(event.key==='Enter')window.entrar()">
     </div>
-    <button class="btn-login" onclick="entrar()">Entrar</button>
+    <button class="btn-login" onclick="window.entrar()">Entrar</button>
     <div class="login-erro" id="login-erro">Senha incorreta.</div>
   </div>
 </div>
@@ -149,15 +149,15 @@ tbody td{padding:10px 14px;color:var(--espresso);font-weight:300;overflow:hidden
 <div class="painel" id="tela-painel">
   <div class="phdr">
     <div class="phdr-brand">Al-qui-mia <span>admin</span></div>
-    <button class="btn-sair" onclick="sair()">Sair</button>
+    <button class="btn-sair" onclick="window.sair()">Sair</button>
   </div>
 
   <!-- ABAS -->
   <div class="abas">
-    <div class="aba ativa" onclick="mudarAba(0)">Confirmações</div>
-    <div class="aba" onclick="mudarAba(1)">Cardápio</div>
-    <div class="aba" onclick="mudarAba(2)">Eventos</div>
-    <div class="aba" onclick="mudarAba(3)">Configurações</div>
+    <div class="aba ativa" onclick="window.mudarAba(0)">Confirmações</div>
+    <div class="aba" onclick="window.mudarAba(1)">Cardápio</div>
+    <div class="aba" onclick="window.mudarAba(2)">Eventos</div>
+    <div class="aba" onclick="window.mudarAba(3)">Configurações</div>
   </div>
 
   <div class="pbody">
@@ -177,7 +177,7 @@ tbody td{padding:10px 14px;color:var(--espresso);font-weight:300;overflow:hidden
         <div class="busca-wrap">
           <input type="text" id="busca" placeholder="Buscar por nome ou WhatsApp…" oninput="filtrar()">
         </div>
-        <button class="btn-acao" onclick="exportarCSV()">↓ Exportar CSV</button>
+        <button class="btn-acao" onclick="window.exportarCSV()">↓ Exportar CSV</button>
       </div>
       <div class="table-wrap">
         <table>
@@ -198,7 +198,7 @@ tbody td{padding:10px 14px;color:var(--espresso);font-weight:300;overflow:hidden
     <div id="aba-1" style="display:none">
       <div class="actions" style="margin-bottom:1.5rem">
         <div class="sec-lbl" style="flex:1;margin:0">Itens do cardápio</div>
-        <button class="btn-acao solid" onclick="abrirModalNovo()">+ Novo item</button>
+        <button class="btn-acao solid" onclick="window.abrirModalNovo()">+ Novo item</button>
       </div>
 
       <!-- Filtro por categoria -->
@@ -228,7 +228,7 @@ tbody td{padding:10px 14px;color:var(--espresso);font-weight:300;overflow:hidden
         <div class="config-row">
           <label>Limite de vagas</label>
           <input type="number" id="cfg-vagas" min="1" max="500" value="30">
-          <button class="btn-acao solid" onclick="salvarVagas()">Salvar</button>
+          <button class="btn-acao solid" onclick="window.salvarVagas()">Salvar</button>
         </div>
         <div class="config-desc">Altera em tempo real — a landing e o painel refletem imediatamente.</div>
       </div>
@@ -306,8 +306,8 @@ tbody td{padding:10px 14px;color:var(--espresso);font-weight:300;overflow:hidden
       <input type="text" id="m-desc" placeholder="Breve descrição">
     </div>
     <div class="modal-acoes">
-      <button class="btn-modal-cancel" onclick="fecharModal()">Cancelar</button>
-      <button class="btn-modal-ok" onclick="salvarItem()">Salvar item</button>
+      <button class="btn-modal-cancel" onclick="window.fecharModal()">Cancelar</button>
+      <button class="btn-modal-ok" onclick="window.salvarItem()">Salvar item</button>
     </div>
   </div>
 </div>
@@ -359,4 +359,454 @@ tbody td{padding:10px 14px;color:var(--espresso);font-weight:300;overflow:hidden
   </div>
 </div>
 
-<div clas
+<div class="toast" id="toast"></div>
+
+<script>
+// placeholder — garante que funções existem antes do módulo carregar
+['entrar','sair','mudarAba','filtrar','exportarCSV',
+ 'filtrarCat','abrirModalNovo','abrirModalEditar','fecharModal','salvarItem','toggleAtivo',
+ 'salvarVagas','salvarEvento','toggleAcompanhantes','toggleCardapio',
+ 'limparColecao','limparTudo',
+ 'abrirModalEvento','editarEvento','fecharModalEvento','salvarEvento2',
+ 'toggleEvento','verConfirmados','exportarConfEv'
+].forEach(fn => { window[fn] = function(){
+  console.warn(fn + ' ainda carregando…');
+}; });
+</script>
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-app.js";
+import {
+  getFirestore, collection, onSnapshot, doc,
+  updateDoc, addDoc, setDoc, getDocs, getDoc, where,
+  query, orderBy, deleteDoc
+} from "https://www.gstatic.com/firebasejs/11.0.0/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey:            "AIzaSyBe76lIVYlw2FrFytDA74HacROTGhyQs6k",
+  authDomain:        "alquimia-7dfd3.firebaseapp.com",
+  projectId:         "alquimia-7dfd3",
+  storageBucket:     "alquimia-7dfd3.firebasestorage.app",
+  messagingSenderId: "638103115384",
+  appId:             "1:638103115384:web:083c881afc8df705ba3f8d"
+};
+const SENHA_ADMIN = "0866";
+const LIMITE_PADRAO = 30;
+
+const app = initializeApp(firebaseConfig);
+const db  = getFirestore(app);
+
+let todosRegistros = [];
+let cardapioItens  = [];
+let editandoId     = null;
+let catFiltro      = "todos";
+let limiteAtual    = LIMITE_PADRAO;
+let streamAtivo    = false;
+
+// ── AUTH ─────────────────────────────────────────────────
+window.entrar = () => {
+  if(document.getElementById("senha-input").value === SENHA_ADMIN){
+    document.getElementById("tela-login").style.display  = "none";
+    document.getElementById("tela-painel").style.display = "block";
+    if(!streamAtivo){ iniciar(); streamAtivo = true; }
+  } else {
+    document.getElementById("login-erro").style.display = "block";
+  }
+};
+window.sair = () => {
+  document.getElementById("tela-login").style.display  = "flex";
+  document.getElementById("tela-painel").style.display = "none";
+  document.getElementById("senha-input").value = "";
+};
+
+// ── ABAS ─────────────────────────────────────────────────
+window.mudarAba = (i) => {
+  document.querySelectorAll(".aba").forEach((a,idx) => a.classList.toggle("ativa",idx===i));
+  [0,1,2,3].forEach(idx => {
+    document.getElementById(`aba-${idx}`).style.display = idx===i ? "block" : "none";
+  });
+};
+
+// ── STREAMS ──────────────────────────────────────────────
+function iniciar(){
+  // confirmações
+  onSnapshot(query(collection(db,"confirmacoes"), orderBy("criadoEm","desc")), snap => {
+    todosRegistros = snap.docs.map((d,i) => ({seq:i+1,...d.data()}));
+    renderizarTabela(todosRegistros);
+    atualizarStats(todosRegistros);
+  });
+
+  // cardápio
+  onSnapshot(query(collection(db,"cardapio"), orderBy("cat","asc")), snap => {
+    cardapioItens = snap.docs.map(d => ({id:d.id,...d.data()}));
+    renderizarCardapio();
+    renderizarFiltrosCat();
+  });
+
+  // config
+  carregarConfig();
+}
+
+// ── CONFIRMAÇÕES ─────────────────────────────────────────
+function atualizarStats(rows){
+  const pessoas = rows.reduce((s,r)=>s+(r.qtd||1),0);
+  const livres  = Math.max(limiteAtual - pessoas, 0);
+  const pct     = Math.min(Math.round((pessoas/limiteAtual)*100),100);
+  document.getElementById("s-confirmados").textContent = rows.length;
+  document.getElementById("s-pessoas").textContent     = pessoas;
+  document.getElementById("s-livres").textContent      = livres;
+  document.getElementById("prog-fill").style.width     = pct + "%";
+  document.getElementById("prog-pct").textContent      = pct + "%";
+}
+
+function renderizarTabela(rows){
+  const tbody = document.getElementById("tabela-body");
+  if(!rows.length){ tbody.innerHTML=`<tr class="empty-row"><td colspan="6">Nenhuma confirmação ainda.</td></tr>`; return; }
+  tbody.innerHTML = rows.map((r,i)=>{
+    const dt = r.criadoEm ? new Date(r.criadoEm).toLocaleString("pt-BR",{dateStyle:"short",timeStyle:"short"}) : "—";
+    return `<tr>
+      <td style="color:var(--mocha)">${i+1}</td>
+      <td style="font-weight:400">${esc(r.nome||"—")}</td>
+      <td>${esc(r.wpp||"—")}</td>
+      <td><span class="badge">${r.qtd||1}</span></td>
+      <td style="color:var(--mocha)">${esc(r.origem||"—")}</td>
+      <td style="color:var(--mocha)">${dt}</td>
+    </tr>`;
+  }).join("");
+}
+
+window.filtrar = () => {
+  const q = document.getElementById("busca").value.toLowerCase();
+  renderizarTabela(todosRegistros.filter(r=>
+    (r.nome||"").toLowerCase().includes(q)||(r.wpp||"").toLowerCase().includes(q)
+  ));
+};
+
+window.exportarCSV = () => {
+  const linhas=[["#","Nome","WhatsApp","Pessoas","Origem","Confirmado em"],
+    ...todosRegistros.map((r,i)=>[i+1,r.nome||"",r.wpp||"",r.qtd||1,r.origem||"",
+      r.criadoEm?new Date(r.criadoEm).toLocaleString("pt-BR"):""
+    ])];
+  const csv = linhas.map(l=>l.map(c=>`"${String(c).replace(/"/g,'""')}"`).join(",")).join("\n");
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(new Blob(["\uFEFF"+csv],{type:"text/csv;charset=utf-8;"}));
+  a.download = `confirmacoes-${new Date().toISOString().slice(0,10)}.csv`;
+  a.click();
+};
+
+// ── CARDÁPIO ─────────────────────────────────────────────
+const CATS = {quentes:"Quentes",frias:"Frias",comes:"Comes",doces:"Doces"};
+
+function renderizarFiltrosCat(){
+  const el = document.getElementById("filtro-cats");
+  const cats = ["todos",...Object.keys(CATS)];
+  el.innerHTML = cats.map(c=>`
+    <button class="btn-acao ${catFiltro===c?"solid":""}" onclick="window.filtrarCat('${c}')">
+      ${c==="todos"?"Todos":CATS[c]}
+    </button>`).join("");
+}
+
+window.filtrarCat = (c) => { catFiltro=c; renderizarFiltrosCat(); renderizarCardapio(); };
+
+function renderizarCardapio(){
+  const el = document.getElementById("lista-cardapio");
+  let itens = catFiltro==="todos" ? cardapioItens : cardapioItens.filter(i=>i.cat===catFiltro);
+
+  if(!itens.length){
+    el.innerHTML=`<div style="padding:2rem;text-align:center;font-style:italic;color:var(--mocha)">Nenhum item${catFiltro!=="todos"?" nesta categoria":""} — clique em "+ Novo item".</div>`;
+    return;
+  }
+
+  el.innerHTML = itens.map(item=>`
+    <div class="card-item ${item.ativo===false?"inativo":""}">
+      <span class="card-cat">${CATS[item.cat]||item.cat}</span>
+      <span class="card-nome">${esc(item.nome)}</span>
+      <span class="card-preco">R$ ${item.preco}</span>
+      <div class="card-acoes">
+        <button class="btn-mini btn-edit" onclick="window.abrirModalEditar('${item.id}')">Editar</button>
+        <button class="btn-mini ${item.ativo===false?"btn-toggle-on":"btn-toggle-off"}"
+          onclick="window.toggleAtivo('${item.id}',${item.ativo===false})">
+          ${item.ativo===false?"Ativar":"Desativar"}
+        </button>
+      </div>
+    </div>`).join("");
+}
+
+window.toggleAtivo = async (id, ativar) => {
+  await updateDoc(doc(db,"cardapio",id),{ativo: ativar});
+  toast(ativar ? "Item ativado" : "Item desativado");
+};
+
+// ── MODAL ────────────────────────────────────────────────
+window.abrirModalNovo = () => {
+  editandoId = null;
+  document.getElementById("modal-titulo").textContent = "Novo item";
+  document.getElementById("m-nome").value  = "";
+  document.getElementById("m-preco").value = "";
+  document.getElementById("m-cat").value   = "quentes";
+  document.getElementById("m-desc").value  = "";
+  document.getElementById("modal-item").classList.add("aberto");
+};
+
+window.abrirModalEditar = (id) => {
+  const item = cardapioItens.find(i=>i.id===id);
+  if(!item) return;
+  editandoId = id;
+  document.getElementById("modal-titulo").textContent = "Editar item";
+  document.getElementById("m-nome").value  = item.nome||"";
+  document.getElementById("m-preco").value = item.preco||"";
+  document.getElementById("m-cat").value   = item.cat||"quentes";
+  document.getElementById("m-desc").value  = item.desc||"";
+  document.getElementById("modal-item").classList.add("aberto");
+};
+
+window.fecharModal = () => {
+  document.getElementById("modal-item").classList.remove("aberto");
+  editandoId = null;
+};
+
+window.salvarItem = async () => {
+  const nome  = document.getElementById("m-nome").value.trim();
+  const preco = parseFloat(document.getElementById("m-preco").value);
+  const cat   = document.getElementById("m-cat").value;
+  const desc  = document.getElementById("m-desc").value.trim();
+  if(!nome || isNaN(preco)){ alert("Nome e preço são obrigatórios."); return; }
+  const dados = {nome, preco, cat, desc, ativo:true};
+  if(editandoId){
+    await updateDoc(doc(db,"cardapio",editandoId), dados);
+    toast("Item atualizado");
+  } else {
+    await addDoc(collection(db,"cardapio"), dados);
+    toast("Item adicionado");
+  }
+  fecharModal();
+};
+
+// ── CONFIGURAÇÕES ────────────────────────────────────────
+function carregarConfig(){
+  onSnapshot(doc(db,"config","evento"), (snap) => {
+    if(snap.exists()){
+      const d = snap.data();
+      if(d.limite){
+        limiteAtual = d.limite;
+        atualizarStats(todosRegistros);
+        document.getElementById("cfg-vagas").value = limiteAtual;
+      }
+      if(d.data) document.getElementById("cfg-data").value = d.data;
+      if(d.hora) document.getElementById("cfg-hora").value = d.hora;
+      // estado do campo acompanhantes
+      const btn = document.getElementById("btn-acomp");
+      if(btn){
+        const ativo = d.acompanhantes_ativo !== false; // default true
+        btn.textContent = ativo ? "Ativado" : "Desativado";
+        btn.style.background = ativo ? "var(--verde)" : "var(--vermelho)";
+        btn.style.borderColor = ativo ? "var(--verde)" : "var(--vermelho)";
+      }
+      // estado do cardápio
+      const btnC = document.getElementById("btn-cardapio");
+      if(btnC){
+        const aberto = d.cardapio_aberto === true;
+        btnC.textContent = aberto ? "✓ Aberto" : "Fechado";
+        btnC.style.background = aberto ? "var(--verde)" : "var(--vermelho)";
+        btnC.style.borderColor = aberto ? "var(--verde)" : "var(--vermelho)";
+      }
+    }
+  });
+}
+
+window.toggleCardapio = async () => {
+  const snap = await getDoc(doc(db,"config","evento"));
+  const atual = snap.exists() ? snap.data().cardapio_aberto === true : false;
+  const novo  = !atual;
+  await setDoc(doc(db,"config","evento"), {cardapio_aberto: novo}, {merge:true});
+  toast(`Cardápio ${novo ? "aberto ✓" : "fechado"}`);
+};
+
+window.toggleAcompanhantes = async () => {
+  const snap = await getDoc(doc(db,"config","evento"));
+  const atual = snap.exists() ? snap.data().acompanhantes_ativo !== false : true;
+  const novo  = !atual;
+  await setDoc(doc(db,"config","evento"), {acompanhantes_ativo: novo}, {merge:true});
+  toast(`Campo acompanhantes ${novo ? "ativado" : "desativado"}`);
+};
+
+window.salvarVagas = async () => {
+  const v = parseInt(document.getElementById("cfg-vagas").value);
+  if(isNaN(v)||v<1){ alert("Informe um número válido."); return; }
+  await setDoc(doc(db,"config","evento"),{limite:v},{merge:true});
+  limiteAtual = v;
+  atualizarStats(todosRegistros);
+  toast(`Limite atualizado para ${v} vagas`);
+};
+
+window.salvarEvento = async () => {
+  const data = document.getElementById("cfg-data").value.trim();
+  const hora = document.getElementById("cfg-hora").value.trim();
+  await setDoc(doc(db,"config","evento"),{data,hora},{merge:true});
+  toast("Evento atualizado");
+};
+
+// ── LIMPEZA ──────────────────────────────────────────────
+window.limparColecao = async (nome) => {
+  const label = nome === "confirmacoes" ? "confirmações" : "comandas";
+  if(!confirm(`Tem certeza? Isso apaga TODAS as ${label} permanentemente.\n\nEsta ação não pode ser desfeita.`)) return;
+  const snap = await getDocs(collection(db, nome));
+  if(snap.empty){ toast(`Nenhuma ${label} para apagar.`); return; }
+  const btn = document.querySelector(`[onclick="window.limparColecao('${nome}')"]`);
+  if(btn){ btn.textContent = "Apagando…"; btn.disabled = true; }
+  let count = 0;
+  for(const d of snap.docs){
+    await deleteDoc(doc(db, nome, d.id));
+    count++;
+  }
+  if(btn){ btn.textContent = `Limpar ${label}`; btn.disabled = false; }
+  toast(`✓ ${count} ${label} removidas`);
+};
+
+window.limparTudo = async () => {
+  if(!confirm("Tem certeza? Isso apaga TODAS as confirmações e comandas permanentemente.\n\nEsta ação não pode ser desfeita.")) return;
+  await window.limparColecao("confirmacoes");
+  await window.limparColecao("comandas");
+};
+
+// ── EVENTOS ──────────────────────────────────────────────
+let eventos = [];
+let editandoEvId = null;
+let confEvAtual  = [];
+
+onSnapshot(query(collection(db,"eventos"), orderBy("criadoEm","desc")), snap => {
+  eventos = snap.docs.map(d => ({id:d.id,...d.data()}));
+  renderizarEventos();
+});
+
+function renderizarEventos(){
+  const el = document.getElementById("lista-eventos");
+  if(!eventos.length){
+    el.innerHTML = `<div style="padding:2rem;text-align:center;font-style:italic;color:var(--mocha)">Nenhum evento cadastrado ainda.</div>`;
+    return;
+  }
+  const base = window.location.origin + window.location.pathname.replace("admin.html","aniversario.html");
+  el.innerHTML = eventos.map(ev => {
+    const link = `${base}?id=${ev.id}`;
+    const ativo = ev.ativo !== false;
+    return `<div class="evento-card">
+      <div class="evento-cor" style="background:${ev.cor||'#9A4A8A'}"></div>
+      <div class="evento-info">
+        <div class="evento-nome">${esc(ev.nome||"—")}</div>
+        <div class="evento-meta">${esc(ev.data||"")} · ${esc(ev.hora||"")} · ${ev.limite||30} vagas</div>
+        <div class="evento-link" onclick="navigator.clipboard.writeText('${link}').then(()=>toast('Link copiado!'))">
+          📋 Copiar link do convite
+        </div>
+      </div>
+      <div class="evento-acoes">
+        <button class="btn-mini btn-edit" onclick="window.verConfirmados('${ev.id}','${esc(ev.nome||"")}')">Confirmados</button>
+        <button class="btn-mini btn-edit" onclick="window.editarEvento('${ev.id}')">Editar</button>
+        <button class="btn-mini ${ativo?"btn-toggle-off":"btn-toggle-on"}" onclick="window.toggleEvento('${ev.id}',${!ativo})">${ativo?"Desativar":"Ativar"}</button>
+      </div>
+    </div>`;
+  }).join("");
+}
+
+window.abrirModalEvento = () => {
+  editandoEvId = null;
+  document.getElementById("modal-evento-titulo").textContent = "Novo evento";
+  ["ev-nome","ev-data","ev-hora","ev-msg"].forEach(id => document.getElementById(id).value = "");
+  document.getElementById("ev-cor").value    = "#9A4A8A";
+  document.getElementById("ev-limite").value = 30;
+  document.getElementById("modal-evento").classList.add("aberto");
+};
+
+window.editarEvento = (id) => {
+  const ev = eventos.find(e=>e.id===id); if(!ev) return;
+  editandoEvId = id;
+  document.getElementById("modal-evento-titulo").textContent = "Editar evento";
+  document.getElementById("ev-nome").value   = ev.nome||"";
+  document.getElementById("ev-data").value   = ev.data||"";
+  document.getElementById("ev-hora").value   = ev.hora||"";
+  document.getElementById("ev-msg").value    = ev.mensagem||"";
+  document.getElementById("ev-cor").value    = ev.cor||"#9A4A8A";
+  document.getElementById("ev-limite").value = ev.limite||30;
+  document.getElementById("modal-evento").classList.add("aberto");
+};
+
+window.fecharModalEvento = () => {
+  document.getElementById("modal-evento").classList.remove("aberto");
+  editandoEvId = null;
+};
+
+window.salvarEvento2 = async () => {
+  const nome     = document.getElementById("ev-nome").value.trim();
+  const data     = document.getElementById("ev-data").value.trim();
+  const hora     = document.getElementById("ev-hora").value.trim();
+  const mensagem = document.getElementById("ev-msg").value.trim();
+  const cor      = document.getElementById("ev-cor").value;
+  const limite   = parseInt(document.getElementById("ev-limite").value)||30;
+  if(!nome){ alert("Informe o nome da aniversariante."); return; }
+  const dados = {nome, data, hora, mensagem, cor, limite, ativo:true};
+  if(editandoEvId){
+    await updateDoc(doc(db,"eventos",editandoEvId), dados);
+    toast("Evento atualizado");
+  } else {
+    dados.criadoEm = new Date().toISOString();
+    const ref = await addDoc(collection(db,"eventos"), dados);
+    toast("Evento criado ✓");
+  }
+  fecharModalEvento();
+};
+
+window.toggleEvento = async (id, ativar) => {
+  await updateDoc(doc(db,"eventos",id),{ativo:ativar});
+  toast(ativar ? "Evento ativado" : "Evento desativado");
+};
+
+window.verConfirmados = async (evId, evNome) => {
+  document.getElementById("modal-conf-titulo").textContent = `Confirmados — ${evNome}`;
+  document.getElementById("modal-conf-lista").innerHTML = "<div style='padding:1rem;color:var(--mocha);font-style:italic'>Carregando…</div>";
+  document.getElementById("modal-confirmados-ev").classList.add("aberto");
+  const snap = await getDocs(query(
+    collection(db,"confirmacoes_evento"), where("evento_id","==",evId)
+  ));
+  confEvAtual = snap.docs.map((d,i)=>({seq:i+1,...d.data()}));
+  const total = confEvAtual.reduce((s,r)=>s+(r.qtd||1),0);
+  if(!confEvAtual.length){
+    document.getElementById("modal-conf-lista").innerHTML = "<div style='padding:1rem;color:var(--mocha);font-style:italic'>Nenhuma confirmação ainda.</div>";
+    return;
+  }
+  document.getElementById("modal-conf-lista").innerHTML = `
+    <div style="font-size:12px;letter-spacing:.18em;text-transform:uppercase;color:var(--gold);margin-bottom:.75rem">${confEvAtual.length} confirmações · ${total} pessoas</div>
+    <div class="table-wrap"><table>
+      <thead><tr><th>#</th><th>Nome</th><th>WhatsApp</th><th>Pessoas</th><th>Em</th></tr></thead>
+      <tbody>${confEvAtual.map((r,i)=>{
+        const dt = r.criadoEm?new Date(r.criadoEm).toLocaleString("pt-BR",{dateStyle:"short",timeStyle:"short"}):"—";
+        return `<tr>
+          <td style="color:var(--mocha)">${i+1}</td>
+          <td style="font-weight:400">${esc(r.nome||"—")}</td>
+          <td>${esc(r.wpp||"—")}</td>
+          <td><span class="badge">${r.qtd||1}</span></td>
+          <td style="color:var(--mocha)">${dt}</td>
+        </tr>`;
+      }).join("")}</tbody>
+    </table></div>`;
+};
+
+window.exportarConfEv = () => {
+  if(!confEvAtual.length){ toast("Nenhum dado","#CF5555"); return; }
+  const linhas=[["#","Nome","WhatsApp","Pessoas","Confirmado em"],
+    ...confEvAtual.map((r,i)=>[i+1,r.nome||"",r.wpp||"",r.qtd||1,
+      r.criadoEm?new Date(r.criadoEm).toLocaleString("pt-BR"):""
+    ])];
+  const csv=linhas.map(l=>l.map(c=>`"${String(c).replace(/"/g,'""')}"`).join(",")).join("\n");
+  const a=document.createElement("a");
+  a.href=URL.createObjectURL(new Blob(["\uFEFF"+csv],{type:"text/csv;charset=utf-8;"}));
+  a.download=`confirmados-${new Date().toISOString().slice(0,10)}.csv`;
+  a.click();
+};
+
+function toast(msg){
+  const t = document.getElementById("toast");
+  t.textContent=msg; t.classList.add("show");
+  setTimeout(()=>t.classList.remove("show"),2500);
+}
+function esc(s){ return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
+</script>
+</body>
+</html>
